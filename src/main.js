@@ -10,17 +10,25 @@ renderer.setPixelRatio(devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
+const controls = new PointerLockControls(camera, renderer.domElement);
+controls.pointerSpeed = 2;
+
+let locked = false;
+
+document.addEventListener('click', function () {
+  if (locked) {
+    controls.unlock();
+    locked = false;
+  } else {
+    controls.lock();
+    locked = true;
+  }
+}, false)
+
 let moveForward = false;
 let moveBackward = false;
 let moveLeft = false;
 let moveRight = false;
-
-const controls = new PointerLockControls(camera, renderer.domElement);
-controls.pointerSpeed = 2;
-
-document.addEventListener('click', function () {
-  controls.lock();
-}, false)
 
 function onKeyDown(event) {
   switch (event.code) {
@@ -45,7 +53,6 @@ function onKeyDown(event) {
       break;
   }
 }
-document.addEventListener('keydown', onKeyDown, false)
 
 function onKeyUp(event) {
   switch (event.code) {
@@ -70,6 +77,8 @@ function onKeyUp(event) {
       break;
   }
 }
+
+document.addEventListener('keydown', onKeyDown, false)
 document.addEventListener('keyup', onKeyUp, false)
 
 window.addEventListener('resize', onWindowResize, false);
@@ -77,8 +86,6 @@ window.addEventListener('resize', onWindowResize, false);
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
-
-  controls.handleResize();
 
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
@@ -92,7 +99,6 @@ scene.add( cube );
 camera.position.z = 5;
 
 const clock = new THREE.Clock();
-
 const direction = new THREE.Vector3();
 
 function animate() {
