@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+import { updateCubes } from './generator';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, 
@@ -90,13 +91,18 @@ function onWindowResize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-const geometry = new THREE.BoxGeometry( 1, 1, 1 );
-const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-const cube = new THREE.Mesh( geometry, material );
+updateCubes(scene, camera);
 
-scene.add( cube );
+const torchlight = new THREE.SpotLight( 0xffd04f, 10, 0, Math.PI/3);
 
-camera.position.z = 5;
+camera.add(torchlight);
+camera.add(torchlight.target);
+torchlight.position.set(0,0,0);
+torchlight.target.position.z = -1;
+
+scene.add(camera);
+
+camera.position.y = 0.5;
 
 const clock = new THREE.Clock();
 const direction = new THREE.Vector3();
@@ -110,11 +116,12 @@ function animate() {
 
   const time = clock.getDelta();
 
-  controls.moveForward(direction.z * 5 * time);
-  controls.moveRight(direction.x  * 5 * time);
+  if ((direction.x !== 0) || (direction.z !== 0)) {
+    updateCubes(scene, camera);
+  }
 
-	// cube.rotation.x += 0.01;
-	// cube.rotation.y += 0.01;
+  controls.moveForward(direction.z * 2 * time);
+  controls.moveRight(direction.x  * 2 * time);
 
 	renderer.render( scene, camera );
 }
