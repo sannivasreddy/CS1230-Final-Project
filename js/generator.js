@@ -16,6 +16,27 @@ let bookshelf;
 //   bookshelf.scale.set(0.4, 0.4, 0.4);
 // })
 
+function hash(key) {
+  key += ~(key << 15);
+  key ^= (key >>> 10);
+  key += (key << 3);
+  key ^= (key >>> 6);
+  key += ~(key << 11);
+  key ^= (key >>> 16);
+  return key >>> 0; // Ensure the result is an unsigned 32-bit integer
+}
+
+const globalseed = 0.001;
+
+function seedrandom(seed) {
+  let state = seed;
+
+  return function() {
+    state = (state * 1103515245 + 12345) % 0x80000000;
+    return state / 0x80000000;
+  };
+}
+
 export async function loadBookshelf() {
   const loader = new GLTFLoader();
   const gltf = await loader.loadAsync("./models/bookshelf.glb");
@@ -61,14 +82,37 @@ function updateCubes(scene, camera) {
       }
       if (bookshelf) {
         const new_cube = bookshelf.clone();
+        //let geometry = new_cube.geometry;
+
+        //let newHeight = 100000000;
+        //geometry.scale(1, newHeight, 1);
         scene.add(new_cube);
-        new_cube.position.set(i, 0, j);
+        const seed = 0.000000001 * hash(i^hash(j^globalseed));
+        const rnd = seedrandom(seed);
+
+        let height = rnd();
+        if(height > 0.5){
+          height = 0.5;
+        } else if (height < 0.3){
+          height = 0.3;
+        }
+        
+        
+        new_cube.position.set(i,0,j);
+        if(i % 5 == 0){
+          new_cube.scale.set(1.0, height, 1);
+        } else {
+          new_cube.scale.set(0.5, height, 1);
+        }
+        
 
         cubes.push(new_cube);
       }
     }
   }
 }
+
+
 
 // function updateCubes(scene, camera) {
 //   let range = 10;
