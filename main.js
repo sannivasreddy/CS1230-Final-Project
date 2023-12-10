@@ -171,11 +171,14 @@ let bmap = new THREE.TextureLoader().load("https://i.imgur.com/bV9Rasi.jpg");
 let dmap = new THREE.TextureLoader().load("https://i.imgur.com/klX9f1V.jpg");
 
 
-let floorTexture = new THREE.TextureLoader().load("/booksBump.jpg");
+let floorTexture = new THREE.TextureLoader().load("/paper.jpg");
+floorTexture.repeat.set(8,8);
+floorTexture.wrapS = THREE.MirroredRepeatWrapping;
+floorTexture.wrapT = THREE.MirroredRepeatWrapping;
 
 let floorMaterial = new THREE.MeshPhongMaterial({map: floorTexture});
 
-let floorGeometry = new THREE.BoxGeometry(20,1,40);
+let floorGeometry = new THREE.BoxGeometry(20,1,40, 1, 1);
 
 let floorMesh = new THREE.Mesh(floorGeometry, floorMaterial);
 
@@ -187,7 +190,7 @@ scene.add(floorMesh);
 
 const loader = new GLTFLoader();
 
-loader.load( '/bookshelf.glb', function ( gltf ) {
+loader.load( '/better_bookshelf.glb', function ( gltf ) {
 
 	scene.add( gltf.scene );
 
