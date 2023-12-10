@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
-import { updateCubes } from './generator';
+import { updateCubes, loadBookshelf } from './generator';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, 
@@ -91,18 +91,31 @@ function onWindowResize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-updateCubes(scene, camera);
+// updateCubes(scene, camera);
 
-const torchlight = new THREE.SpotLight( 0xffd04f, 10, 0, Math.PI/3);
+const promise = loadBookshelf();
+promise.then(result => {
+  updateCubes(scene,camera);
+});
 
-camera.add(torchlight);
-camera.add(torchlight.target);
-torchlight.position.set(0,0,0);
-torchlight.target.position.z = -1;
+// const torchlight = new THREE.SpotLight( 0xffffff, 10, 0, Math.PI/3);
+
+// camera.add(torchlight);
+// camera.add(torchlight.target);
+// torchlight.position.set(0,0,0);
+// torchlight.target.position.z = -1;
+
+scene.add(new THREE.HemisphereLight());
+
+const geometry = new THREE.PlaneGeometry( 20, 20 );
+const material = new THREE.MeshBasicMaterial( {color: 0x281C14} );
+const plane = new THREE.Mesh( geometry, material );
+plane.lookAt(new THREE.Vector3(0, 1, 0));
+scene.add( plane );
 
 scene.add(camera);
 
-camera.position.y = 0.5;
+camera.position.set(0.5, 0.5, 0.5);
 
 const clock = new THREE.Clock();
 const direction = new THREE.Vector3();
@@ -116,12 +129,15 @@ function animate() {
 
   const time = clock.getDelta();
 
+  console.log(plane.position);
+
   if ((direction.x !== 0) || (direction.z !== 0)) {
     updateCubes(scene, camera);
   }
 
   controls.moveForward(direction.z * 2 * time);
   controls.moveRight(direction.x  * 2 * time);
+  plane.position.set(camera.position.x, 0, camera.position.z);
 
 	renderer.render( scene, camera );
 }
