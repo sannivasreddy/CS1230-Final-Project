@@ -170,6 +170,19 @@ let bmap = new THREE.TextureLoader().load("https://i.imgur.com/bV9Rasi.jpg");
 //let bmap = new THREE.TextureLoader().load("/booksBump.jpg");
 let dmap = new THREE.TextureLoader().load("https://i.imgur.com/klX9f1V.jpg");
 
+
+let floorTexture = new THREE.TextureLoader().load("/booksBump.jpg");
+
+let floorMaterial = new THREE.MeshPhongMaterial({map: floorTexture});
+
+let floorGeometry = new THREE.BoxGeometry(20,1,40);
+
+let floorMesh = new THREE.Mesh(floorGeometry, floorMaterial);
+
+floorMesh.translateY(-5.5);
+
+scene.add(floorMesh);
+
 //let dmap = new THREE.TextureLoader().load("/booksDis.jpg");
 
 const loader = new GLTFLoader();
@@ -194,6 +207,18 @@ let material = new THREE.MeshPhongMaterial({
 });
 
 var object = new THREE.Mesh(
+  new THREE.BoxGeometry( 5, 10, 2,  200,200,1),
+  [
+      new THREE.MeshLambertMaterial( {bumpMap: bmap,map:woodMap}),
+      new THREE.MeshLambertMaterial( {bumpMap: bmap, map: woodMap}),
+      new THREE.MeshLambertMaterial( {bumpMap: bmap,map:woodMap} ),
+      new THREE.MeshLambertMaterial( {bumpMap: bmap,map:woodMap}),
+      new THREE.MeshLambertMaterial( {bumpMap:bmap, bumpScale: 1.3, displacementMap: dmap, displacementScale: 0.1, map: map}), 
+      new THREE.MeshLambertMaterial( {bumpMap: bmap,map:woodMap}),
+  ]
+);
+
+var object_two = new THREE.Mesh(
   new THREE.BoxGeometry( 5, 10, 2,  200,200,1),
   [
       new THREE.MeshLambertMaterial( {bumpMap: bmap,map:woodMap}),
