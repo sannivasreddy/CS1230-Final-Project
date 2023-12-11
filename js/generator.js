@@ -81,6 +81,7 @@ function updateCubes(scene, camera) {
         continue;
       }
       if (bookshelf) {
+        //I thought creating a walkway in the middle w/ no bookshelves would be cool
         if(i==0){
           continue;
         }
@@ -93,7 +94,7 @@ function updateCubes(scene, camera) {
         const seed = 0.000000001 * hash(i^hash(j^globalseed));
         const rnd = seedrandom(seed);
 
-        //Clamp the heights so they aren't super tall or super short (Here, I also get rid of extremes so it's not just a boring grid and there's some randomness)
+        //Clamp the heights so they aren't super tall or super short (Here, I also get rid of extremes so it's not just a boring grid and there's some randomness). Could also add some desks here or something
         let height = rnd();
         if(height > 0.8 || height < 0.1){
           continue;
@@ -104,7 +105,7 @@ function updateCubes(scene, camera) {
           height = 0.3
         }
         
-        
+        //This can go, tbh, I just thought it looked cool.
         new_cube.position.set(i,0,j);
         if(i % 5 == 0){
           new_cube.scale.set(1, height, 1);
