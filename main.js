@@ -96,7 +96,7 @@ function onWindowResize() {
 
 
 const ambientLight = new THREE.AmbientLight(0xffffff, 1); // white light with intensity 0.5
-scene.add(ambientLight);
+//scene.add(ambientLight);
 
 
 let modelLoader = new GLTFLoader();
@@ -160,9 +160,13 @@ let modelLoader = new GLTFLoader();
 // );
 
 
-const pointLight = new THREE.PointLight(0xff0015, 1, 1000, 2);
-pointLight.position.set(0,0, 30);
-scene.add(pointLight);
+const pointLight = new THREE.PointLight( 0xffffff, 100, 100 );
+pointLight.position.set( 10, 10, 10 );
+scene.add( pointLight );
+
+const sphereSize = 1;
+const pointLightHelper = new THREE.PointLightHelper( pointLight, sphereSize );
+scene.add( pointLightHelper );
 
 let map = new THREE.TextureLoader().load("https://i.imgur.com/MRAwlSR.png"); 
 let woodMap = new THREE.TextureLoader().load("https://i.imgur.com/2PdASf1.png");
@@ -171,14 +175,15 @@ let bmap = new THREE.TextureLoader().load("https://i.imgur.com/bV9Rasi.jpg");
 let dmap = new THREE.TextureLoader().load("https://i.imgur.com/klX9f1V.jpg");
 
 
-let floorTexture = new THREE.TextureLoader().load("/paper.jpg");
-floorTexture.repeat.set(8,8);
+let floorTexture = new THREE.TextureLoader().load("https://i.imgur.com/bulJaEv.png");
+let floorDis = new THREE.TextureLoader().load("https://i.imgur.com/pjje6ql.png");
+floorTexture.repeat.set(2,2);
 floorTexture.wrapS = THREE.MirroredRepeatWrapping;
 floorTexture.wrapT = THREE.MirroredRepeatWrapping;
 
-let floorMaterial = new THREE.MeshPhongMaterial({map: floorTexture});
+let floorMaterial = new THREE.MeshPhongMaterial({map: floorTexture, color: 0xffffff});
 
-let floorGeometry = new THREE.BoxGeometry(20,1,40, 1, 1);
+let floorGeometry = new THREE.BoxGeometry(20,1,40, 400, 400);
 
 let floorMesh = new THREE.Mesh(floorGeometry, floorMaterial);
 
@@ -206,7 +211,8 @@ let material = new THREE.MeshPhongMaterial({
   bumpScale: 5,
   displacementMap: dmap,
   displacementScale: .2,
-  map: map
+  map: map,
+  color: 0xffffff
 });
 
 var object = new THREE.Mesh(
