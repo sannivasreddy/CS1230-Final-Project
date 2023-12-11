@@ -9,6 +9,7 @@ const camera = new THREE.PerspectiveCamera(75,
 const renderer = new THREE.WebGLRenderer();
 renderer.setPixelRatio(devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
 document.body.appendChild(renderer.domElement);
 
 const controls = new PointerLockControls(camera, renderer.domElement);
@@ -91,13 +92,6 @@ function onWindowResize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-// updateCubes(scene, camera);
-
-const promise = loadBookshelf();
-promise.then(result => {
-  updateCubes(scene,camera);
-});
-
 // const torchlight = new THREE.SpotLight( 0xffffff, 10, 0, Math.PI/3);
 
 // camera.add(torchlight);
@@ -105,20 +99,61 @@ promise.then(result => {
 // torchlight.position.set(0,0,0);
 // torchlight.target.position.z = -1;
 
-scene.add(new THREE.HemisphereLight());
+const loader = new THREE.CubeTextureLoader();
+loader.setPath('./images/daylight/');
 
-const geometry = new THREE.PlaneGeometry( 20, 20 );
-const material = new THREE.MeshBasicMaterial( {color: 0x281C14} );
+const textureCube = loader.load([
+  'Daylight Box_Right.bmp', 'Daylight Box_Left.bmp',
+  'Daylight Box_Top.bmp', 'Daylight Box_Bottom.bmp',
+  'Daylight Box_Front.bmp', 'Daylight Box_Back.bmp'
+]);
+
+scene.background = textureCube;
+
+const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 1);
+scene.add(hemiLight);
+
+const dirLight = new THREE.DirectionalLight(0xffffff, 3);
+dirLight.color.setHSL(0.1, 1, 0.95);
+dirLight.position.set(0, 1, 1);
+scene.add(dirLight);
+
+const texture_loader = new THREE.TextureLoader();
+texture_loader.setPath('./images/worn_floor/');
+
+const floor_color = texture_loader.load('wood_floor_worn_diff_1k.jpg');
+floor_color.wrapS = THREE.RepeatWrapping;
+floor_color.wrapT = THREE.RepeatWrapping;
+floor_color.repeat.set(16, 16);
+const floor_normal = texture_loader.load('wood_floor_worn_nor_gl_1k.exr');
+const floor_disp = texture_loader.load('wood_floor_worn_disp_1k.exr');
+const floor_rough = texture_loader.load('wood_floor_worn_rough_1k.exr');
+
+
+const geometry = new THREE.PlaneGeometry(20, 20);
+const material = new THREE.MeshStandardMaterial({
+  map: floor_color,
+  displacementMap: floor_disp,
+  normalMap: floor_normal,
+  roughnessMap: floor_rough
+});
 const plane = new THREE.Mesh( geometry, material );
 plane.lookAt(new THREE.Vector3(0, 1, 0));
 scene.add( plane );
 
 scene.add(camera);
 
-camera.position.set(0.5, 0.5, 0.5);
+camera.position.set(0, 0.5, 0);
 
 const clock = new THREE.Clock();
 const direction = new THREE.Vector3();
+
+const promise = loadBookshelf();
+promise.then(result => {
+  updateCubes(scene,camera);
+});
+
+let offsetX, offsetZ;
 
 function animate() {
 	requestAnimationFrame( animate );
@@ -130,12 +165,18 @@ function animate() {
   const time = clock.getDelta();
 
   if ((direction.x !== 0) || (direction.z !== 0)) {
-    updateCubes(scene, camera);
-  }
+    controls.moveForward(direction.z * 1 * time);
+    controls.moveRight(direction.x * 1 * time);
 
-  controls.moveForward(direction.z * 2 * time);
-  controls.moveRight(direction.x  * 2 * time);
-  plane.position.set(camera.position.x, 0, camera.position.z);
+    updateCubes(scene, camera);
+
+    plane.position.set(camera.position.x, plane.position.y, camera.position.z);
+
+    offsetX = camera.position.x;
+    offsetZ = -camera.position.z;
+  
+    plane.material.map.offset.set( offsetX, offsetZ );
+  }
 
 	renderer.render( scene, camera );
 }
