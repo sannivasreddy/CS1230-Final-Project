@@ -37,7 +37,7 @@ function seedrandom(seed) {
   };
 }
 
-export async function loadBookshelf() {
+async function loadBookshelf() {
   const loader = new GLTFLoader();
   const gltf = await loader.loadAsync("./models/bookshelf.glb");
   bookshelf = gltf.scene;
@@ -85,25 +85,26 @@ function updateCubes(scene, camera) {
         if(i==0){
           continue;
         }
+        const seed = 0.000000001 * hash(i^hash(j^globalseed));
+        const rnd = seedrandom(seed);
+
+        //Clamp the heights so they aren't super tall or super short (Here, I also get rid of extremes so it's not just a boring grid and there's some randomness). Could also add some desks here or something
+        let height = rnd();
+        if (height > 0.8 || height < 0.1) {
+          continue;
+        }
+        if (height > 0.5) {
+          height = 0.5;
+        } else if (height < 0.3) {
+          height = 0.3
+        }
+
         const new_cube = bookshelf.clone();
         //let geometry = new_cube.geometry;
 
         //let newHeight = 100000000;
         //geometry.scale(1, newHeight, 1);
         scene.add(new_cube);
-        const seed = 0.000000001 * hash(i^hash(j^globalseed));
-        const rnd = seedrandom(seed);
-
-        //Clamp the heights so they aren't super tall or super short (Here, I also get rid of extremes so it's not just a boring grid and there's some randomness). Could also add some desks here or something
-        let height = rnd();
-        if(height > 0.8 || height < 0.1){
-          continue;
-        }
-        if(height > 0.5){
-          height = 0.5;
-        } else if(height < 0.3){
-          height = 0.3
-        }
         
         //This can go, tbh, I just thought it looked cool.
         new_cube.position.set(i,0,j);
@@ -168,4 +169,4 @@ function updateCubes(scene, camera) {
 //   }
 // }
 
-export { updateCubes }
+export { updateCubes, loadBookshelf }

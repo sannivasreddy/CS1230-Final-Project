@@ -129,8 +129,6 @@ function animate() {
 
   const time = clock.getDelta();
 
-  console.log(plane.position);
-
   if ((direction.x !== 0) || (direction.z !== 0)) {
     updateCubes(scene, camera);
   }
