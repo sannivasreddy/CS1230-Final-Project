@@ -81,6 +81,9 @@ function updateCubes(scene, camera) {
         continue;
       }
       if (bookshelf) {
+        if(i==0){
+          continue;
+        }
         const new_cube = bookshelf.clone();
         //let geometry = new_cube.geometry;
 
@@ -90,17 +93,21 @@ function updateCubes(scene, camera) {
         const seed = 0.000000001 * hash(i^hash(j^globalseed));
         const rnd = seedrandom(seed);
 
+        //Clamp the heights so they aren't super tall or super short (Here, I also get rid of extremes so it's not just a boring grid and there's some randomness)
         let height = rnd();
+        if(height > 0.8 || height < 0.1){
+          continue;
+        }
         if(height > 0.5){
           height = 0.5;
-        } else if (height < 0.3){
-          height = 0.3;
+        } else if(height < 0.3){
+          height = 0.3
         }
         
         
         new_cube.position.set(i,0,j);
         if(i % 5 == 0){
-          new_cube.scale.set(1.0, height, 1);
+          new_cube.scale.set(1, height, 1);
         } else {
           new_cube.scale.set(0.5, height, 1);
         }
