@@ -100,17 +100,17 @@ function onWindowResize() {
 // torchlight.target.position.z = -1;
 
 const loader = new THREE.CubeTextureLoader();
-loader.setPath('./images/daylight/');
+loader.setPath('./images/nylib/');
 
 const textureCube = loader.load([
-  'Daylight Box_Right.bmp', 'Daylight Box_Left.bmp',
-  'Daylight Box_Top.bmp', 'Daylight Box_Bottom.bmp',
-  'Daylight Box_Front.bmp', 'Daylight Box_Back.bmp'
+  'px.png', 'nx.png',
+  'py.png', 'ny.png',
+  'pz.png', 'nz.png'
 ]);
 
 scene.background = textureCube;
 
-const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 1);
+const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.7);
 scene.add(hemiLight);
 
 const dirLight = new THREE.DirectionalLight(0xffffff, 3);
@@ -137,9 +137,9 @@ const material = new THREE.MeshStandardMaterial({
   normalMap: floor_normal,
   roughnessMap: floor_rough
 });
-const plane = new THREE.Mesh( geometry, material );
-plane.lookAt(new THREE.Vector3(0, 1, 0));
-scene.add( plane );
+const floor = new THREE.Mesh( geometry, material );
+floor.lookAt(new THREE.Vector3(0, 1, 0));
+scene.add( floor );
 
 scene.add(camera);
 
@@ -165,17 +165,17 @@ function animate() {
   const time = clock.getDelta();
 
   if ((direction.x !== 0) || (direction.z !== 0)) {
-    controls.moveForward(direction.z * 1 * time);
-    controls.moveRight(direction.x * 1 * time);
+    controls.moveForward(direction.z * 2 * time);
+    controls.moveRight(direction.x * 2 * time);
 
     updateCubes(scene, camera);
 
-    plane.position.set(camera.position.x, plane.position.y, camera.position.z);
+    floor.position.set(camera.position.x, floor.position.y, camera.position.z);
 
     offsetX = camera.position.x;
     offsetZ = -camera.position.z;
   
-    plane.material.map.offset.set( offsetX, offsetZ );
+    floor.material.map.offset.set( offsetX, offsetZ );
   }
 
 	renderer.render( scene, camera );

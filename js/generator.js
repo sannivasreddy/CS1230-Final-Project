@@ -8,13 +8,7 @@ const geometry = new THREE.BoxGeometry(0.25, 1, 0.25);
 const material = new THREE.MeshBasicMaterial({color: 0x331f0E});
 
 let bookshelf;
-
-// const loader = new GLTFLoader();
-// loader.load("./models/bookshelf.glb",
-// function (gltf) {
-//   bookshelf = gltf.scene;
-//   bookshelf.scale.set(0.4, 0.4, 0.4);
-// })
+let old_shelf;
 
 function hash(key) {
   key += ~(key << 15);
@@ -39,9 +33,13 @@ function seedrandom(seed) {
 
 async function loadBookshelf() {
   const loader = new GLTFLoader();
-  const gltf = await loader.loadAsync("./models/bookshelf.glb");
+  const gltf = await loader.loadAsync("./models/victorian_bookshelf.glb");
   bookshelf = gltf.scene;
-  bookshelf.scale.set(0.4, 0.4, 0.4);
+  bookshelf.rotation.set(0, -Math.PI/2, 0);
+
+  const old_gltf = await loader.loadAsync("./models/dusty_old_bookshelf.glb");
+  old_shelf = old_gltf.scene;
+  old_shelf.rotation.set(0, Math.PI, 0);
 }
 
 function updateCubes(scene, camera) {
@@ -80,7 +78,7 @@ function updateCubes(scene, camera) {
       if (checked_points[i - (nearest_x - range)][j - (nearest_z - range)]) {
         continue;
       }
-      if (bookshelf) {
+      if (bookshelf && old_shelf) {
         //I thought creating a walkway in the middle w/ no bookshelves would be cool
         if(i==0){
           continue;
@@ -88,33 +86,41 @@ function updateCubes(scene, camera) {
         const seed = 0.000000001 * hash(i^hash(j^globalseed));
         const rnd = seedrandom(seed);
 
-        //Clamp the heights so they aren't super tall or super short (Here, I also get rid of extremes so it's not just a boring grid and there's some randomness). Could also add some desks here or something
+        // Clamp the heights so they aren't super tall or super short (Here, I also get rid 
+        // of extremes so it's not just a boring grid and there's some randomness). 
+        // Could also add some desks here or something
         let height = rnd();
         if (height > 0.8 || height < 0.1) {
           continue;
         }
-        if (height > 0.5) {
-          height = 0.5;
+        if (height > 0.6) {
+          height = 0.6;
         } else if (height < 0.3) {
           height = 0.3
         }
+        let new_cube;
 
-        const new_cube = bookshelf.clone();
-        //let geometry = new_cube.geometry;
+        let shelf_choose = rnd();
+        if (shelf_choose >= 0.5) {
+          new_cube = old_shelf.clone();
+          if (i % 5 == 0) {
+            new_cube.scale.set(1, height, 1);
+          } else {
+            new_cube.scale.set(0.5, height, 1);
+          }
 
-        //let newHeight = 100000000;
-        //geometry.scale(1, newHeight, 1);
-        scene.add(new_cube);
-        
-        //This can go, tbh, I just thought it looked cool.
-        new_cube.position.set(i,0,j);
-        if(i % 5 == 0){
-          new_cube.scale.set(1, height, 1);
         } else {
-          new_cube.scale.set(0.5, height, 1);
+          new_cube = bookshelf.clone();
+          if (i % 5 == 0) {
+            new_cube.scale.set(1, height, 0.5);
+          } else {
+            new_cube.scale.set(1, height, 0.25);
+          }
         }
-        
 
+        new_cube.position.set(i, 0 ,j);
+
+        scene.add(new_cube);
         cubes.push(new_cube);
       }
     }
