@@ -9,6 +9,7 @@ const material = new THREE.MeshBasicMaterial({color: 0x331f0E});
 
 let bookshelf;
 let old_shelf;
+let desk;
 
 function hash(key) {
   key += ~(key << 15);
@@ -40,6 +41,10 @@ async function loadBookshelf() {
   const old_gltf = await loader.loadAsync("./models/dusty_old_bookshelf.glb");
   old_shelf = old_gltf.scene;
   old_shelf.rotation.set(0, Math.PI, 0);
+
+  const desk_gltf = await loader.loadAsync("./models/simple_desk_free.glb");
+  desk = desk_gltf.scene;
+  desk.rotation.set(0, 0, 0);
 }
 
 function updateCubes(scene, camera) {
@@ -81,16 +86,34 @@ function updateCubes(scene, camera) {
       if (bookshelf && old_shelf) {
         //I thought creating a walkway in the middle w/ no bookshelves would be cool
         if(i==0){
+          
           continue;
         }
         const seed = 0.000000001 * hash(i^hash(j^globalseed));
         const rnd = seedrandom(seed);
 
+        //I've decided to only add "other objects" every 5th row since it looks a little weird to have them interspersed w/ bookshelves
+        if(j%5 == 0){
+          if(desk){
+            let desk_decider = rnd();
+            if(desk_decider < 0.5){
+              let desk_cube = desk.clone()
+              desk_cube.position.set(i, 0 ,j);
+              desk_cube.scale.set(0.5, 0.5, 0.5);
+
+              scene.add(desk_cube);
+              cubes.push(desk_cube);
+              continue;
+            }
+          }  
+          
+        }
+
         // Clamp the heights so they aren't super tall or super short (Here, I also get rid 
         // of extremes so it's not just a boring grid and there's some randomness). 
         // Could also add some desks here or something
         let height = rnd();
-        if (height > 0.8 || height < 0.1) {
+        if (height > 0.8 || height < 0.1) {    
           continue;
         }
         if (height > 0.6) {
