@@ -108,7 +108,7 @@ const textureCube = loader.load([
   'pz.png', 'nz.png'
 ]);
 
-scene.background = textureCube;
+// scene.background = textureCube;
 
 const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.7);
 scene.add(hemiLight);
@@ -124,13 +124,13 @@ texture_loader.setPath('./images/worn_floor/');
 const floor_color = texture_loader.load('wood_floor_worn_diff_1k.jpg');
 floor_color.wrapS = THREE.RepeatWrapping;
 floor_color.wrapT = THREE.RepeatWrapping;
-floor_color.repeat.set(16, 16);
+floor_color.repeat.set(32, 32);
 const floor_normal = texture_loader.load('wood_floor_worn_nor_gl_1k.exr');
 const floor_disp = texture_loader.load('wood_floor_worn_disp_1k.exr');
 const floor_rough = texture_loader.load('wood_floor_worn_rough_1k.exr');
 
 
-const geometry = new THREE.PlaneGeometry(20, 20);
+const geometry = new THREE.PlaneGeometry(60, 60);
 const material = new THREE.MeshStandardMaterial({
   map: floor_color,
   displacementMap: floor_disp,
@@ -150,7 +150,7 @@ const direction = new THREE.Vector3();
 
 const promise = loadBookshelf();
 promise.then(result => {
-  updateCubes(scene,camera);
+  updateCubes(scene,camera, true);
 });
 
 let offsetX, offsetZ;
@@ -168,12 +168,12 @@ function animate() {
     controls.moveForward(direction.z * 2 * time);
     controls.moveRight(direction.x * 2 * time);
 
-    updateCubes(scene, camera);
+    updateCubes(scene, camera, false);
 
     floor.position.set(camera.position.x, floor.position.y, camera.position.z);
 
-    offsetX = camera.position.x;
-    offsetZ = -camera.position.z;
+    offsetX = camera.position.x / 2;
+    offsetZ = -camera.position.z / 2;
   
     floor.material.map.offset.set( offsetX, offsetZ );
   }

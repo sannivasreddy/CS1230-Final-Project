@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@gltf-transform/cli": "^3.9.0",
     "three": "^0.159.0"
   },
   "devDependencies": {

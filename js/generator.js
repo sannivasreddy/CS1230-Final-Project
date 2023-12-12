@@ -1,8 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-let cubes = [];
-
 const geometry = new THREE.BoxGeometry(0.25, 1, 0.25);
 // const material = new THREE.MeshLambertMaterial({ color: 0x331f0E});
 const material = new THREE.MeshBasicMaterial({color: 0x331f0E});
@@ -33,17 +31,22 @@ function seedrandom(seed) {
 
 async function loadBookshelf() {
   const loader = new GLTFLoader();
-  const gltf = await loader.loadAsync("./models/victorian_bookshelf.glb");
+
+  // Victorian - Opt textures use gltf-transform
+  const gltf = await loader.loadAsync("./models/vict_opt.glb");
   bookshelf = gltf.scene;
   bookshelf.rotation.set(0, -Math.PI/2, 0);
 
-  const old_gltf = await loader.loadAsync("./models/dusty_old_bookshelf.glb");
+  // Dusty Old
+  const old_gltf = await loader.loadAsync("./models/oldshelf_opt.glb");
   old_shelf = old_gltf.scene;
   old_shelf.rotation.set(0, Math.PI, 0);
 }
 
-function updateCubes(scene, camera) {
-  let range = 8;
+let cubes = [];
+
+function updateCubes(scene, camera, forceAll) {
+  let range = 25;
 
   let nearest_x = Math.round(camera.position.x);
   let nearest_z = Math.round(camera.position.z);
