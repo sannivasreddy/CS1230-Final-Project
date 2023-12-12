@@ -10,6 +10,7 @@ const material = new THREE.MeshBasicMaterial({color: 0x331f0E});
 let bookshelf;
 let old_shelf;
 let desk;
+let table;
 
 function hash(key) {
   key += ~(key << 15);
@@ -45,6 +46,10 @@ async function loadBookshelf() {
   const desk_gltf = await loader.loadAsync("./models/simple_desk_free.glb");
   desk = desk_gltf.scene;
   desk.rotation.set(0, 0, 0);
+
+  const table_gltf = await loader.loadAsync("./models/round_table_and_chairs.glb");
+  table = table_gltf.scene;
+  table.rotation.set(0,Math.PI,0);
 }
 
 function updateCubes(scene, camera) {
@@ -91,22 +96,28 @@ function updateCubes(scene, camera) {
         }
         const seed = 0.000000001 * hash(i^hash(j^globalseed));
         const rnd = seedrandom(seed);
-
-        //I've decided to only add "other objects" every 5th row since it looks a little weird to have them interspersed w/ bookshelves
+        //I've decided to only add desks and other objects every 5th row since it looks a little weird to have them interspersed w/ bookshelves
         if(j%5 == 0){
           if(desk){
             let desk_decider = rnd();
-            if(desk_decider < 0.5){
-              let desk_cube = desk.clone()
+            if(desk_decider < 0.3){
+              let desk_cube = desk.clone();
               desk_cube.position.set(i, 0 ,j);
               desk_cube.scale.set(0.5, 0.5, 0.5);
 
               scene.add(desk_cube);
               cubes.push(desk_cube);
               continue;
+            } else if(desk_decider < 0.6){
+              let table_cube = table.clone();
+              table_cube.position.set(i, 0, j);
+              table_cube.scale.set(0.3,0.3,0.3);
+
+              scene.add(table_cube);
+              cubes.push(table_cube);
+              continue;
             }
           }  
-          
         }
 
         // Clamp the heights so they aren't super tall or super short (Here, I also get rid 
@@ -114,6 +125,7 @@ function updateCubes(scene, camera) {
         // Could also add some desks here or something
         let height = rnd();
         if (height > 0.8 || height < 0.1) {    
+          
           continue;
         }
         if (height > 0.6) {
