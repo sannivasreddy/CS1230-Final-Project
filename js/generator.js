@@ -8,6 +8,7 @@ const geometry = new THREE.BoxGeometry(0.25, 1, 0.25);
 const material = new THREE.MeshBasicMaterial({color: 0x331f0E});
 
 let bookshelf;
+let floor; 
 
 // const loader = new GLTFLoader();
 // loader.load("./models/bookshelf.glb",
@@ -37,12 +38,17 @@ function seedrandom(seed) {
   };
 }
 
+
+
 async function loadBookshelf() {
   const loader = new GLTFLoader();
   const gltf = await loader.loadAsync("./models/bookshelf.glb");
   bookshelf = gltf.scene;
   bookshelf.scale.set(0.4, 0.4, 0.4);
 }
+
+
+
 
 function updateCubes(scene, camera) {
   let range = 8;
@@ -51,19 +57,23 @@ function updateCubes(scene, camera) {
   let nearest_z = Math.round(camera.position.z);
 
   let new_cubes = [];
-
   let checked_points = [];
+
+  
 
   for (let i = 0; i <= (2 * range); ++i) {
     checked_points[i] = [];
+    
     for (let j = 0; j <= (2 * range); ++j) {
       checked_points[i][j] = false;
+      
     }
   }
 
   for (const cube of cubes) {
     let x = cube.position.x;
     let z = cube.position.z;
+
     if ((x < nearest_x - range) || (x > nearest_x + range) ||
       (z < nearest_z - range) || (z > nearest_z + range)) {
       scene.remove(cube);
@@ -73,13 +83,17 @@ function updateCubes(scene, camera) {
     }
   }
 
-  cubes = new_cubes;
+  
+
+  
 
   for (let i = nearest_x - range; i <= nearest_x + range; ++i) {
     for (let j = nearest_z - range; j <= nearest_z + range; ++j) {
+
       if (checked_points[i - (nearest_x - range)][j - (nearest_z - range)]) {
         continue;
       }
+      
       if (bookshelf) {
         //I thought creating a walkway in the middle w/ no bookshelves would be cool
         if(i==0){
@@ -169,4 +183,4 @@ function updateCubes(scene, camera) {
 //   }
 // }
 
-export { updateCubes, loadBookshelf }
+export { updateCubes, loadBookshelf}

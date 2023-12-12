@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
-import { updateCubes, loadBookshelf } from './generator';
+import { updateCubes, loadBookshelf} from './generator';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, 
@@ -131,15 +131,25 @@ const floor_rough = texture_loader.load('wood_floor_worn_rough_1k.exr');
 
 
 const geometry = new THREE.PlaneGeometry(20, 20);
-const material = new THREE.MeshStandardMaterial({
+const material = new THREE.MeshPhongMaterial({
   map: floor_color,
   displacementMap: floor_disp,
-  normalMap: floor_normal,
-  roughnessMap: floor_rough
+  normalMap: floor_normal
 });
+
+
 const plane = new THREE.Mesh( geometry, material );
+const ceiling = new THREE.Mesh(geometry, material);
+const wall_back = new THREE.Mesh(geometry, material);
+ceiling.position.set(0,2.5,0);
+wall_back.position.set(0,2,10);
+wall_back.lookAt(new THREE.Vector3(0,2,1));
+ceiling.lookAt(new THREE.Vector3(0,1,0));
 plane.lookAt(new THREE.Vector3(0, 1, 0));
+scene.add(wall_back);
 scene.add( plane );
+scene.add (ceiling);
+
 
 scene.add(camera);
 
@@ -147,6 +157,8 @@ camera.position.set(0, 0.5, 0);
 
 const clock = new THREE.Clock();
 const direction = new THREE.Vector3();
+
+
 
 const promise = loadBookshelf();
 promise.then(result => {
@@ -171,11 +183,13 @@ function animate() {
     updateCubes(scene, camera);
 
     plane.position.set(camera.position.x, plane.position.y, camera.position.z);
+    
 
     offsetX = camera.position.x;
     offsetZ = -camera.position.z;
-  
+
     plane.material.map.offset.set( offsetX, offsetZ );
+    
   }
 
 	renderer.render( scene, camera );
