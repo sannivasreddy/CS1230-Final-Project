@@ -130,7 +130,7 @@ loader.setPath('./images/walls/');
 // dirLight.position.set(0, 1, 1);
 // scene.add(dirLight);
 
-let ambientLight = new THREE.AmbientLight(0xffffff,0.3);
+let ambientLight = new THREE.AmbientLight(0xffffff,0.8);
 scene.add(ambientLight);
 
 let pointLight = new THREE.PointLight(0xefc070,10,10,2);
@@ -161,8 +161,9 @@ texture_loader.setPath('./images/walls/');
 
 
 
-let ceiling_height = 140; 
-let walls_height = 55;
+let wall_ceiling_height = 55; 
+let ceiling_height = 30;
+let walls_height = 22;
 
 const wall_forward_texture = texture_loader.load('library_window_two.png');
 const wall_b = texture_loader.load('library_two_b.png');
@@ -181,9 +182,9 @@ wall_forward_texture.wrapT = THREE.RepeatWrapping;
 wall_forward_texture.repeat.set(1, 1);
 
 
-const wall_geometry = new THREE.PlaneGeometry(300, ceiling_height, 1000, 1000);
+const wall_geometry = new THREE.PlaneGeometry(200, wall_ceiling_height, 1000, 1000);
 const ceiling_geometry = new THREE.PlaneGeometry(120, 120, 100, 100);
-const ceiling_material = new THREE.MeshPhongMaterial({map: ceiling_texture, displacementMap: ceiling_dis, displacementScale: 2});
+const ceiling_material = new THREE.MeshPhongMaterial({map: ceiling_texture, displacementMap: ceiling_dis, displacementScale: 0});
 const wall_material_front = new THREE.MeshPhongMaterial({map: wall_forward_texture, bumpMap: wall_b, bumpScale: 10, displacementMap: wall_dis, displacementScale: 6});
 
 
@@ -203,7 +204,7 @@ wall_forward.position.set(0,walls_height,-100);
 wall_left.position.set(-100, walls_height, 0);
 wall_right.position.set(100, walls_height, 0);
 wall_back.position.set(0, walls_height , 100);
-wall_ceiling.position.set(0, 75, 0);
+wall_ceiling.position.set(0, ceiling_height, 0);
 
 scene.add(wall_forward);
 scene.add(wall_left);
@@ -260,7 +261,7 @@ function animate() {
     wall_left.position.set(camera.position.x - 100, floor.position.y + walls_height, camera.position.z);
     wall_right.position.set(camera.position.x + 100, floor.position.y + walls_height, camera.position.z);
     wall_back.position.set(camera.position.x, floor.position.y + walls_height, camera.position.z + 100);
-    wall_ceiling.position.set(camera.position.x, floor.position.y + 75, camera.position.z);
+    wall_ceiling.position.set(camera.position.x, floor.position.y + ceiling_height, camera.position.z);
 
     offsetX = camera.position.x;
     offsetZ = -camera.position.z;
