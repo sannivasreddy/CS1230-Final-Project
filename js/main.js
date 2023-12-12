@@ -1,15 +1,17 @@
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+import { RectAreaLightHelper }  from 'three/examples/jsm/helpers/RectAreaLightHelper.js';
 import { updateCubes, loadBookshelf } from './generator';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, 
-  window.innerWidth / window.innerHeight, 0.1, 100);
+  window.innerWidth / window.innerHeight, 0.1, 1000);
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setPixelRatio(devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
 
 const controls = new PointerLockControls(camera, renderer.domElement);
@@ -100,23 +102,48 @@ function onWindowResize() {
 // torchlight.target.position.z = -1;
 
 const loader = new THREE.CubeTextureLoader();
-loader.setPath('./images/nylib/');
+// loader.setPath('./images/nylib/');
+loader.setPath('./images/walls/');
 
-const textureCube = loader.load([
-  'px.png', 'nx.png',
-  'py.png', 'ny.png',
-  'pz.png', 'nz.png'
-]);
+// const textureCube = loader.load([
+//   'px.png', 'nx.png',
+//   'py.png', 'ny.png',
+//   'pz.png', 'nz.png'
+// ]);
 
-scene.background = textureCube;
+// const textureCube = loader.load([
+//   'square.png', 'square.png',
+//   'square.png', 'square.png',
+//   'square.png', 'square.png'
+// ]);
 
-const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.7);
-scene.add(hemiLight);
 
-const dirLight = new THREE.DirectionalLight(0xffffff, 3);
-dirLight.color.setHSL(0.1, 1, 0.95);
-dirLight.position.set(0, 1, 1);
-scene.add(dirLight);
+// scene.background = textureCube;
+
+
+
+// const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.7);
+// scene.add(hemiLight);
+
+// const dirLight = new THREE.DirectionalLight(0xffffff, 3);
+// dirLight.color.setHSL(0.1, 1, 0.95);
+// dirLight.position.set(0, 1, 1);
+// scene.add(dirLight);
+
+let ambientLight = new THREE.AmbientLight(0xffffff,0.3);
+scene.add(ambientLight);
+
+let pointLight = new THREE.PointLight(0xefc070,10,10,2);
+let pointHelper = new THREE.PointLightHelper(pointLight,0.1);
+pointLight.castShadow = true;
+pointLight.shadow.mapSize.width = 512; // default
+pointLight.shadow.mapSize.height = 512; // default
+pointLight.shadow.camera.near = 0.5; // default
+pointLight.shadow.camera.far = 500; // default
+pointLight.add(pointHelper);
+pointLight.position.set(0,0.25,0);
+scene.add(pointLight);
+
 
 const texture_loader = new THREE.TextureLoader();
 texture_loader.setPath('./images/worn_floor/');
@@ -125,22 +152,80 @@ const floor_color = texture_loader.load('wood_floor_worn_diff_1k.jpg');
 floor_color.wrapS = THREE.RepeatWrapping;
 floor_color.wrapT = THREE.RepeatWrapping;
 floor_color.repeat.set(16, 16);
-const floor_normal = texture_loader.load('wood_floor_worn_nor_gl_1k.exr');
-const floor_disp = texture_loader.load('wood_floor_worn_disp_1k.exr');
-const floor_rough = texture_loader.load('wood_floor_worn_rough_1k.exr');
+const floor_disp = texture_loader.load('worn_dis.jpg');
+const floor_bump = texture_loader.load('word_dis.jpg');
 
 
-const geometry = new THREE.PlaneGeometry(20, 20);
-const material = new THREE.MeshStandardMaterial({
+texture_loader.setPath('./images/walls/');
+
+
+
+
+let ceiling_height = 140; 
+let walls_height = 55;
+
+const wall_forward_texture = texture_loader.load('library_window_two.png');
+const wall_b = texture_loader.load('library_two_b.png');
+const wall_dis = texture_loader.load('test.png');
+const ceiling_dis = texture_loader.load('ceiling_dis.png');
+const ceiling_texture = texture_loader.load('ceiling.png');
+
+
+ceiling_texture.wrapS = THREE.RepeatWrapping;
+ceiling_texture.wrapT = THREE.RepeatWrapping;
+
+wall_forward_texture.wrapS = THREE.RepeatWrapping;
+wall_forward_texture.wrapT = THREE.RepeatWrapping;
+
+
+wall_forward_texture.repeat.set(1, 1);
+
+
+const wall_geometry = new THREE.PlaneGeometry(300, ceiling_height, 1000, 1000);
+const ceiling_geometry = new THREE.PlaneGeometry(120, 120, 100, 100);
+const ceiling_material = new THREE.MeshPhongMaterial({map: ceiling_texture, displacementMap: ceiling_dis, displacementScale: 2});
+const wall_material_front = new THREE.MeshPhongMaterial({map: wall_forward_texture, bumpMap: wall_b, bumpScale: 10, displacementMap: wall_dis, displacementScale: 6});
+
+
+const wall_forward = new THREE.Mesh(wall_geometry, wall_material_front);
+const wall_left = new THREE.Mesh(wall_geometry, wall_material_front);
+const wall_right = new THREE.Mesh(wall_geometry, wall_material_front);
+const wall_back = new THREE.Mesh(wall_geometry, wall_material_front);
+const wall_ceiling = new THREE.Mesh(ceiling_geometry, ceiling_material);
+
+wall_left.lookAt(new THREE.Vector3(1,0,0));
+wall_forward.lookAt(new THREE.Vector3(0,0,0));
+wall_right.lookAt(new THREE.Vector3(-1, 0, 0));
+wall_back.lookAt(new THREE.Vector3(0,0,-1));
+wall_ceiling.lookAt(new THREE.Vector3(0,-1,0));
+
+wall_forward.position.set(0,walls_height,-100);
+wall_left.position.set(-100, walls_height, 0);
+wall_right.position.set(100, walls_height, 0);
+wall_back.position.set(0, walls_height , 100);
+wall_ceiling.position.set(0, 75, 0);
+
+scene.add(wall_forward);
+scene.add(wall_left);
+scene.add(wall_right);
+scene.add(wall_back);
+scene.add(wall_ceiling);
+
+const geometry = new THREE.PlaneGeometry(20, 20, 10, 10);
+
+const material = new THREE.MeshPhongMaterial({
   map: floor_color,
   displacementMap: floor_disp,
-  normalMap: floor_normal,
-  roughnessMap: floor_rough
+  displacementScale: 0.1,
+  bumpMap: floor_bump,
+  bumpScale: 10
 });
-const floor = new THREE.Mesh( geometry, material );
-floor.lookAt(new THREE.Vector3(0, 1, 0));
-scene.add( floor );
 
+const floor = new THREE.Mesh( geometry, material );
+
+floor.lookAt(new THREE.Vector3(0, 1, 0));
+
+scene.add( floor );
 scene.add(camera);
 
 camera.position.set(0, 0.5, 0);
@@ -171,11 +256,17 @@ function animate() {
     updateCubes(scene, camera);
 
     floor.position.set(camera.position.x, floor.position.y, camera.position.z);
+    wall_forward.position.set(camera.position.x, floor.position.y + walls_height, camera.position.z - 100);
+    wall_left.position.set(camera.position.x - 100, floor.position.y + walls_height, camera.position.z);
+    wall_right.position.set(camera.position.x + 100, floor.position.y + walls_height, camera.position.z);
+    wall_back.position.set(camera.position.x, floor.position.y + walls_height, camera.position.z + 100);
+    wall_ceiling.position.set(camera.position.x, floor.position.y + 75, camera.position.z);
 
     offsetX = camera.position.x;
     offsetZ = -camera.position.z;
   
     floor.material.map.offset.set( offsetX, offsetZ );
+    wall_ceiling.material.map.offset.set(offsetX/1000, -offsetZ/1000);
   }
 
 	renderer.render( scene, camera );

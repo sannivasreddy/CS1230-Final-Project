@@ -38,11 +38,14 @@ async function loadBookshelf() {
   const gltf = await loader.loadAsync("./models/victorian_bookshelf.glb");
   bookshelf = gltf.scene;
   bookshelf.rotation.set(0, -Math.PI/2, 0);
+  
+ 
 
   const old_gltf = await loader.loadAsync("./models/dusty_old_bookshelf.glb");
   old_shelf = old_gltf.scene;
   old_shelf.rotation.set(0, Math.PI, 0);
 
+  
   const desk_gltf = await loader.loadAsync("./models/simple_desk_free.glb");
   desk = desk_gltf.scene;
   desk.rotation.set(0, 0, 0);
@@ -154,7 +157,7 @@ function updateCubes(scene, camera) {
         }
 
         new_cube.position.set(i, 0 ,j);
-
+        
         scene.add(new_cube);
         cubes.push(new_cube);
       }
