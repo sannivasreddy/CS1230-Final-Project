@@ -110,13 +110,16 @@ const textureCube = loader.load([
 
 // scene.background = textureCube;
 
-const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.7);
-scene.add(hemiLight);
+// const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.7);
+// scene.add(hemiLight);
 
-const dirLight = new THREE.DirectionalLight(0xffffff, 3);
-dirLight.color.setHSL(0.1, 1, 0.95);
-dirLight.position.set(0, 1, 1);
-scene.add(dirLight);
+// const dirLight = new THREE.DirectionalLight(0xffffff, 3);
+// dirLight.color.setHSL(0.1, 1, 0.95);
+// dirLight.position.set(0, 1, 1);
+// scene.add(dirLight);
+
+//color, intensity, distance, decay
+
 
 const texture_loader = new THREE.TextureLoader();
 texture_loader.setPath('./images/worn_floor/');
@@ -131,11 +134,8 @@ const floor_rough = texture_loader.load('wood_floor_worn_rough_1k.exr');
 
 
 const geometry = new THREE.PlaneGeometry(60, 60);
-const material = new THREE.MeshStandardMaterial({
-  map: floor_color,
-  displacementMap: floor_disp,
-  normalMap: floor_normal,
-  roughnessMap: floor_rough
+const material = new THREE.MeshPhongMaterial({
+  map: floor_color
 });
 const floor = new THREE.Mesh( geometry, material );
 floor.lookAt(new THREE.Vector3(0, 1, 0));
@@ -143,7 +143,7 @@ scene.add( floor );
 
 scene.add(camera);
 
-camera.position.set(0, 0.5, 0);
+camera.position.set(0, 1, 0);
 
 const clock = new THREE.Clock();
 const direction = new THREE.Vector3();
@@ -154,6 +154,24 @@ promise.then(result => {
 });
 
 let offsetX, offsetZ;
+
+
+const ambient = new THREE.AmbientLight(0xffffff,0.2);
+scene.add(ambient);
+//color intensity distance angle penum
+const spotLight = new THREE.SpotLight( 0xffffff, 5, 10, Math.PI * 0.1, 1);
+spotLight.position.set(0, 3, 0 );
+scene.add(spotLight);
+const sphereSize = 1;
+const spotLightHelper = new THREE.SpotLightHelper( spotLight);
+scene.add( spotLightHelper );
+
+// let pointLight = new THREE.PointLight(0xffffff,100,20,2);
+// pointLight.position.set(0,4,0);
+// let pointHelper = new THREE.PointLightHelper(pointLight, sphereSize);
+
+
+
 
 function animate() {
 	requestAnimationFrame( animate );
@@ -171,6 +189,8 @@ function animate() {
     updateCubes(scene, camera, false);
 
     floor.position.set(camera.position.x, floor.position.y, camera.position.z);
+    //spotLight.position.set(camera.position.x + 3 , floor.position.y + 2, camera.position.z + 3);
+    //targetObject.position.set(camera.position.x, floor.position.y, camera.position.z);
 
     offsetX = camera.position.x / 2;
     offsetZ = -camera.position.z / 2;
