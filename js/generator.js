@@ -1,9 +1,15 @@
+import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 let bookshelf;
 let old_shelf;
 let desk;
 let table;
+let lamp;
+
+function modelsLoaded() {
+  return bookshelf && old_shelf && desk && table && lamp;
+}
 
 function hash(key) {
   key += ~(key << 15);
@@ -22,6 +28,18 @@ function seedrandom(seed) {
     state = (state * 1103515245 + 12345) % 0x80000000;
     return state / 0x80000000;
   };
+}
+
+let unused_lights = [];
+let used_lights = [];
+
+export function initSceneLights(scene) {
+  for (let i = 0; i < 16; ++i) {
+    const light = new THREE.PointLight(0xefc070,5,2,0.5);
+    light.visible = false;
+    unused_lights.push(light);
+    scene.add(light);
+  }
 }
 
 export async function loadModels() {
@@ -45,6 +63,23 @@ export async function loadModels() {
   const table_gltf = await loader.loadAsync("./models/table_opt.glb");
   table = table_gltf.scene;
   table.rotation.set(0,Math.PI,0);
+
+  // Lamp
+  const lamp_gltf = await loader.loadAsync("./models/sep_primLamp.glb");
+  lamp = lamp_gltf.scene;
+
+  const transparentMaterial = new THREE.MeshPhongMaterial({
+    color: 0x8F8563,
+    opacity: 0.95, // Set the desired opacity between 0 and 1
+    transparent: true, // Enable transparency for the material
+    side: THREE.DoubleSide,
+    emissive: 0xefc070,
+    emissiveIntensity: 2,
+    toneMapped: false
+  });
+
+  lamp.children[2].material = transparentMaterial;
+
 }
 
 let i_offset = 0;
@@ -66,8 +101,10 @@ export function clearModels(scene) {
 
 const globalseed = 0.001;
 
+const light_lamp = new THREE.PointLight(0xefc070,5,2,0.5);
+
 export function updateCubes(scene, camera) {
-  let range = 25;
+  let range = 5;
 
   let nearest_x = Math.round(camera.position.x);
   let nearest_z = Math.round(camera.position.z);
@@ -94,6 +131,22 @@ export function updateCubes(scene, camera) {
     }
   }
 
+  // let new_used_lights = [];
+  // let cur_light = used_lights.pop();
+  // while (cur_light !== undefined) {
+  //   let x = cur_light.position.x;
+  //   let z = cur_light.position.z;
+  //   if ((x < nearest_x - range) || (x > nearest_x + range) ||
+  //     (z < nearest_z - range) || (z > nearest_z + range)) {
+  //     light.visible = false;
+  //     unused_lights.push(cur_light);
+  //   } else {
+  //     new_used_lights.push(cur_light);
+  //   }
+  //   cur_light = used_lights.pop();
+  // }
+  // used_lights = new_used_lights;
+
   cubes = new_cubes;
 
   for (let i = nearest_x - range; i <= nearest_x + range; ++i) {
@@ -101,7 +154,7 @@ export function updateCubes(scene, camera) {
       if (checked_points[i - (nearest_x - range)][j - (nearest_z - range)]) {
         continue;
       }
-      if (bookshelf && old_shelf && desk && table) {
+      if (modelsLoaded()) {
         //I thought creating a walkway in the middle w/ no bookshelves would be cool
         if (i == 0) {
           continue;
@@ -112,16 +165,37 @@ export function updateCubes(scene, camera) {
         let new_cube;
 
         if ((j % 5) == 0) {
-          let desk_decider = rnd();
-          if (desk_decider < 0.3) {
+          let misc_decider = rnd();
+          if (misc_decider < 0.3) {
             new_cube = desk.clone();
             new_cube.scale.set(0.5, 0.5, 0.5);
-          } else if (desk_decider < 0.6) {
+            new_cube.position.set(i, 0, j);
+          }
+          else if (misc_decider < 0.4) {
+            // let possible_lamp = unused_lights.pop();
+            // if (possible_lamp === undefined) {
+            //   continue;
+            // }
+            new_cube = lamp.clone();
+            new_cube.scale.set(0.2, 0.2, 0.2);
+            new_cube.position.set(i, 0.1, j);
+
+            let light = light_lamp.clone();
+            light.position.set(i, 0.7, j);
+            scene.add(light);
+            cubes.push(light);
+
+            // possible_lamp.position.set(i, 0.7, j);
+            // possible_lamp.visible = true;
+            // used_lights.push(possible_lamp);
+          }
+          else if (misc_decider < 0.7) {
             new_cube = table.clone();
             new_cube.scale.set(0.3, 0.3, 0.3);
-          }
-          if (new_cube) {
             new_cube.position.set(i, 0, j);
+          }
+
+          if (new_cube) {
             scene.add(new_cube);
             cubes.push(new_cube);
           }

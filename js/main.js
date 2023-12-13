@@ -1,7 +1,10 @@
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
-import { updateCubes, loadModels, randomizeOffset, clearModels } from './generator';
+import { updateCubes, loadModels, randomizeOffset, clearModels, initSceneLights } from './generator';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, 
@@ -11,6 +14,10 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setPixelRatio(devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
+
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+composer.addPass(new UnrealBloomPass(undefined, 1, 1, 1))
 
 const controls = new PointerLockControls(camera, renderer.domElement);
 controls.pointerSpeed = 2;
@@ -110,16 +117,18 @@ function createPanel() {
 createPanel();
 
 // OLD LIGHTING
-const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.7);
-scene.add(hemiLight);
+// const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.2);
+// scene.add(hemiLight);
 
 // const dirLight = new THREE.DirectionalLight(0xffffff, 3);
 // dirLight.color.setHSL(0.1, 1, 0.95);
 // dirLight.position.set(0, 1, 1);
 // scene.add(dirLight);
 
-let ambientLight = new THREE.AmbientLight(0xffffff,0.5);
+let ambientLight = new THREE.AmbientLight(0xffffff,0.3);
 scene.add(ambientLight);
+
+// initSceneLights(scene);
 
 // let pointLight = new THREE.PointLight(0xefc070,10,10,2);
 // pointLight.castShadow = true;
@@ -155,7 +164,7 @@ scene.add( floor );
 
 // RUG
 
-const rug_texture = texture_loader.load('rug.png');
+const rug_texture = texture_loader.load('rug_two.png');
 rug_texture.anisotropy = 8;
 const rug_dis = texture_loader.load('rug_dis.png');
 rug_texture.wrapS = THREE.RepeatWrapping;
@@ -263,7 +272,6 @@ function animate() {
 
     floor.position.set(camera.position.x, floor.position.y, camera.position.z);
     rug.position.set(rug.position.x, rug.position.y, camera.position.z);
-
 
     wall_forward.position.set(camera.position.x, floor.position.y + walls_height, camera.position.z - 100);
     wall_left.position.set(camera.position.x - 100, floor.position.y + walls_height, camera.position.z);
