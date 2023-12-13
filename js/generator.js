@@ -2,6 +2,8 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 let bookshelf;
 let old_shelf;
+let desk;
+let table;
 
 function hash(key) {
   key += ~(key << 15);
@@ -22,18 +24,27 @@ function seedrandom(seed) {
   };
 }
 
-export async function loadBookshelf() {
+export async function loadModels() {
   const loader = new GLTFLoader();
 
-  // Victorian - Opt textures use gltf-transform
+  // Victorian Bookshelf - Opt textures are optimised with gltf-transform
   const gltf = await loader.loadAsync("./models/vict_opt.glb");
   bookshelf = gltf.scene;
   bookshelf.rotation.set(0, -Math.PI/2, 0);
 
-  // Dusty Old
+  // Dusty Old Bookshelf
   const old_gltf = await loader.loadAsync("./models/oldshelf_opt.glb");
   old_shelf = old_gltf.scene;
   old_shelf.rotation.set(0, Math.PI, 0);
+
+  // Desk
+  const desk_gltf = await loader.loadAsync("./models/desk_opt.glb");
+  desk = desk_gltf.scene;
+
+  // Table
+  const table_gltf = await loader.loadAsync("./models/table_opt.glb");
+  table = table_gltf.scene;
+  table.rotation.set(0,Math.PI,0);
 }
 
 let i_offset = 0;
@@ -62,7 +73,6 @@ export function updateCubes(scene, camera) {
   let nearest_z = Math.round(camera.position.z);
 
   let new_cubes = [];
-
   let checked_points = [];
 
   for (let i = 0; i <= (2 * range); ++i) {
@@ -91,17 +101,35 @@ export function updateCubes(scene, camera) {
       if (checked_points[i - (nearest_x - range)][j - (nearest_z - range)]) {
         continue;
       }
-      if (bookshelf && old_shelf) {
+      if (bookshelf && old_shelf && desk && table) {
         //I thought creating a walkway in the middle w/ no bookshelves would be cool
-        if(i==0){
+        if (i == 0) {
           continue;
         }
         const seed = 0.000000001 * hash((i + i_offset)^hash((j+j_offset)^globalseed));
         const rnd = seedrandom(seed);
 
+        let new_cube;
+
+        if ((j % 5) == 0) {
+          let desk_decider = rnd();
+          if (desk_decider < 0.3) {
+            new_cube = desk.clone();
+            new_cube.scale.set(0.5, 0.5, 0.5);
+          } else if (desk_decider < 0.6) {
+            new_cube = table.clone();
+            new_cube.scale.set(0.3, 0.3, 0.3);
+          }
+          if (new_cube) {
+            new_cube.position.set(i, 0, j);
+            scene.add(new_cube);
+            cubes.push(new_cube);
+          }
+          continue;
+        }
+
         // Clamp the heights so they aren't super tall or super short (Here, I also get rid 
         // of extremes so it's not just a boring grid and there's some randomness). 
-        // Could also add some desks here or something
         let height = rnd();
         if (height > 0.8 || height < 0.1) {
           continue;
@@ -111,7 +139,6 @@ export function updateCubes(scene, camera) {
         } else if (height < 0.3) {
           height = 0.3
         }
-        let new_cube;
 
         let shelf_choose = rnd();
         if (shelf_choose >= 0.5) {
