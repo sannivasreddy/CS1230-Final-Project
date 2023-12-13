@@ -1,11 +1,11 @@
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import * as THREE from "three";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 let cubes = [];
 
 const geometry = new THREE.BoxGeometry(0.25, 1, 0.25);
 // const material = new THREE.MeshLambertMaterial({ color: 0x331f0E});
-const material = new THREE.MeshBasicMaterial({color: 0x331f0E});
+const material = new THREE.MeshBasicMaterial({ color: 0x331f0e });
 
 let bookshelf;
 let old_shelf;
@@ -14,11 +14,11 @@ let table;
 
 function hash(key) {
   key += ~(key << 15);
-  key ^= (key >>> 10);
-  key += (key << 3);
-  key ^= (key >>> 6);
+  key ^= key >>> 10;
+  key += key << 3;
+  key ^= key >>> 6;
   key += ~(key << 11);
-  key ^= (key >>> 16);
+  key ^= key >>> 16;
   return key >>> 0; // Ensure the result is an unsigned 32-bit integer
 }
 
@@ -27,7 +27,7 @@ const globalseed = 0.001;
 function seedrandom(seed) {
   let state = seed;
 
-  return function() {
+  return function () {
     state = (state * 1103515245 + 12345) % 0x80000000;
     return state / 0x80000000;
   };
@@ -37,22 +37,21 @@ async function loadBookshelf() {
   const loader = new GLTFLoader();
   const gltf = await loader.loadAsync("./models/victorian_bookshelf.glb");
   bookshelf = gltf.scene;
-  bookshelf.rotation.set(0, -Math.PI/2, 0);
-  
- 
+  bookshelf.rotation.set(0, -Math.PI / 2, 0);
 
   const old_gltf = await loader.loadAsync("./models/dusty_old_bookshelf.glb");
   old_shelf = old_gltf.scene;
   old_shelf.rotation.set(0, Math.PI, 0);
 
-  
   const desk_gltf = await loader.loadAsync("./models/simple_desk_free.glb");
   desk = desk_gltf.scene;
   desk.rotation.set(0, 0, 0);
 
-  const table_gltf = await loader.loadAsync("./models/round_table_and_chairs.glb");
+  const table_gltf = await loader.loadAsync(
+    "./models/round_table_and_chairs.glb"
+  );
   table = table_gltf.scene;
-  table.rotation.set(0,Math.PI,0);
+  table.rotation.set(0, Math.PI, 0);
 }
 
 function updateCubes(scene, camera) {
@@ -65,9 +64,9 @@ function updateCubes(scene, camera) {
 
   let checked_points = [];
 
-  for (let i = 0; i <= (2 * range); ++i) {
+  for (let i = 0; i <= 2 * range; ++i) {
     checked_points[i] = [];
-    for (let j = 0; j <= (2 * range); ++j) {
+    for (let j = 0; j <= 2 * range; ++j) {
       checked_points[i][j] = false;
     }
   }
@@ -75,8 +74,12 @@ function updateCubes(scene, camera) {
   for (const cube of cubes) {
     let x = cube.position.x;
     let z = cube.position.z;
-    if ((x < nearest_x - range) || (x > nearest_x + range) ||
-      (z < nearest_z - range) || (z > nearest_z + range)) {
+    if (
+      x < nearest_x - range ||
+      x > nearest_x + range ||
+      z < nearest_z - range ||
+      z > nearest_z + range
+    ) {
       scene.remove(cube);
     } else {
       checked_points[x - (nearest_x - range)][z - (nearest_z - range)] = true;
@@ -93,48 +96,46 @@ function updateCubes(scene, camera) {
       }
       if (bookshelf && old_shelf) {
         //I thought creating a walkway in the middle w/ no bookshelves would be cool
-        if(i==0){
-          
+        if (i == 0) {
           continue;
         }
-        const seed = 0.000000001 * hash(i^hash(j^globalseed));
+        const seed = 0.000000001 * hash(i ^ hash(j ^ globalseed));
         const rnd = seedrandom(seed);
         //I've decided to only add desks and other objects every 5th row since it looks a little weird to have them interspersed w/ bookshelves
-        if(j%5 == 0){
-          if(desk){
+        if (j % 5 == 0) {
+          if (desk) {
             let desk_decider = rnd();
-            if(desk_decider < 0.3){
+            if (desk_decider < 0.3) {
               let desk_cube = desk.clone();
-              desk_cube.position.set(i, 0 ,j);
+              desk_cube.position.set(i, 0, j);
               desk_cube.scale.set(0.5, 0.5, 0.5);
 
               scene.add(desk_cube);
               cubes.push(desk_cube);
               continue;
-            } else if(desk_decider < 0.6){
+            } else if (desk_decider < 0.6) {
               let table_cube = table.clone();
               table_cube.position.set(i, 0, j);
-              table_cube.scale.set(0.3,0.3,0.3);
+              table_cube.scale.set(0.3, 0.3, 0.3);
 
               scene.add(table_cube);
               cubes.push(table_cube);
               continue;
             }
-          }  
+          }
         }
 
-        // Clamp the heights so they aren't super tall or super short (Here, I also get rid 
-        // of extremes so it's not just a boring grid and there's some randomness). 
+        // Clamp the heights so they aren't super tall or super short (Here, I also get rid
+        // of extremes so it's not just a boring grid and there's some randomness).
         // Could also add some desks here or something
         let height = rnd();
-        if (height > 0.8 || height < 0.1) {    
-          
+        if (height > 0.8 || height < 0.1) {
           continue;
         }
         if (height > 0.6) {
           height = 0.6;
         } else if (height < 0.3) {
-          height = 0.3
+          height = 0.3;
         }
         let new_cube;
 
@@ -146,7 +147,6 @@ function updateCubes(scene, camera) {
           } else {
             new_cube.scale.set(0.5, height, 1);
           }
-
         } else {
           new_cube = bookshelf.clone();
           if (i % 5 == 0) {
@@ -156,16 +156,14 @@ function updateCubes(scene, camera) {
           }
         }
 
-        new_cube.position.set(i, 0 ,j);
-        
+        new_cube.position.set(i, 0, j);
+
         scene.add(new_cube);
         cubes.push(new_cube);
       }
     }
   }
 }
-
-
 
 // function updateCubes(scene, camera) {
 //   let range = 10;
@@ -213,4 +211,4 @@ function updateCubes(scene, camera) {
 //   }
 // }
 
-export { updateCubes, loadBookshelf }
+export { updateCubes, loadBookshelf };

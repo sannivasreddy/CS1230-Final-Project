@@ -4,11 +4,13 @@ import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
 
-import vertexShader from "./shaders/vertexShader.glsl.js";
-import fragmentShader from "./shaders/fragmentShader.glsl.js";
-import rayFragmentShader from "./shaders/rayFragmentShader.glsl.js";
+import vertexShader from "./js/shaders/vertexShader.glsl.js";
+import fragmentShader from "./js/shaders/fragmentShader.glsl.js";
+import rayFragmentShader from "./js/shaders/rayFragmentShader.glsl.js";
 
 import { PointerLockControls } from "three/addons/controls/PointerLockControls.js";
+
+import { BoxLight } from "./js/objects/boxLight.js";
 
 var camera, renderer;
 
@@ -34,6 +36,8 @@ let moveRight = false;
 const clock = new THREE.Clock();
 const direction = new THREE.Vector3();
 
+let light2;
+
 init();
 animate();
 
@@ -43,7 +47,7 @@ function init() {
     75,
     window.innerWidth / window.innerHeight,
     0.1,
-    100
+    200
   );
   camera.position.z = 5;
   finalScene = new THREE.Scene();
@@ -66,6 +70,8 @@ function init() {
   godRayPass = new ShaderPass({
     uniforms: {
       lightTex: { value: null },
+      fX: { value: null },
+      fY: { value: null },
     },
     vertexShader: vertexShader,
     fragmentShader: rayFragmentShader,
@@ -102,9 +108,13 @@ function init() {
     color: 0x00ff00,
   });
   sphereMesh = new THREE.Mesh(sphereGeo, sphereMat);
-  sphereMesh.translateZ(-5);
+  sphereMesh.translateZ(5);
+  sphereMesh.translateY(10);
+  //sphereMesh.rotateX(-Math.PI / 2);
   rayScene.add(sphereMesh);
   rayScene.add(cubeMesh);
+
+  addLights();
 
   // Renderer
   renderer = new THREE.WebGLRenderer({ antialias: false });
@@ -114,6 +124,19 @@ function init() {
   document.addEventListener("keydown", onKeyDown, false);
   document.addEventListener("keyup", onKeyUp, false);
   initPostprocessing();
+}
+
+function addLights() {
+  var light1 = new BoxLight();
+  light2 = new BoxLight();
+  var light3 = new BoxLight();
+  var light4 = new BoxLight();
+
+  light1.setPosition(0, 0, 100);
+  light2.setPosition(0, 0, -100);
+
+  rayScene.add(light1.group);
+  rayScene.add(light2.group);
 }
 
 function initPostprocessing() {
@@ -151,10 +174,23 @@ function render() {
   renderer.render(objectScene, camera);
   renderer.setRenderTarget(null);
 
+  camera.updateMatrixWorld();
+
+  // Project the 3D object's position to 2D screen coordinates
+  var screenPosition = new THREE.Vector3();
+  light2.group.getWorldPosition(screenPosition);
+  screenPosition.project(camera);
+
+  // Convert the screen coordinates to normalized device coordinates (NDC)
+  var x = (screenPosition.x + 1) / 2;
+  var y = (-screenPosition.y + 1) / 2;
+
   const rTexture = rayTarget.texture;
   const oTexture = objectTarget.texture;
 
   godRayPass.uniforms.lightTex.value = rTexture;
+  godRayPass.uniforms.fX.value = x;
+  godRayPass.uniforms.fY.value = y;
 
   shaderPass.uniforms.texture2.value = oTexture;
 

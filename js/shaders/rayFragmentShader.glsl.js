@@ -1,33 +1,39 @@
 export default /* glsl */ `
+    varying vec2 vUv;
+    uniform sampler2D tDiffuse;  
+    uniform sampler2D objectText;
+    uniform sampler2D floorText;
+    uniform vec2 lightPosition;  
+    uniform float exposure;  
+    uniform float decay;  
+    uniform float density;  
+    uniform float weight;  
+    uniform int samples;  
+    const int MAX_SAMPLES = 100;  
+    void main()  
+    {  
+    vec4 original = texture2D(objectText, vUv);
+    vec2 texCoord = vUv;  
+    vec2 deltaTextCoord = texCoord - lightPosition;  
+    deltaTextCoord *= 1.0 / float(samples) * density;  
+    vec4 color = texture2D(tDiffuse, texCoord);  
+    float illuminationDecay = 1.0;  
+    for(int i=0; i < MAX_SAMPLES; i++)  
+    {  
+        if(i == samples){  
+        break;  
+        }  
+        texCoord -= deltaTextCoord;  
+        vec4 sampleColor = texture2D(tDiffuse, texCoord);  
+        
+        sampleColor *= illuminationDecay * weight;  
+        color += sampleColor;  
+        illuminationDecay *= decay;  
+    }  
 
-varying vec2 vUv;
-uniform sampler2D lightTex;
 
-float exposure = 0.6;
-float decay  = 0.93;
-float density = 0.96;
-float weight = 0.90;
-
-int samples = 50;
-
-void main() {
-
-    vec2 toCenter = vec2(0.5, 0.5) - vUv;
-    vec2 coord = vUv;
-    vec4 color = vec4(0.0);
-    float delta = 1.0 / float(samples);
-    float illuminationDecay = 1.0;
-
-    for(int i =0; i < samples; i++) {
-
-        vec4 colorSamp = texture2D(lightTex, coord + toCenter * delta * float(i));
-
-        color += colorSamp * (illuminationDecay * weight);
-        illuminationDecay *= weight;
-
-    }
-
-    color.a  = 1.;
-    gl_FragColor = color;
-}
+    //gl_FragColor = 1. - (1. - original)*(1. - finalColor);  
+    vec4 finalColor = color * exposure;
+    gl_FragColor = finalColor + original + texture2D(floorText, vUv);
+    }  
 `;
