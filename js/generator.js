@@ -30,18 +30,6 @@ function seedrandom(seed) {
   };
 }
 
-let unused_lights = [];
-let used_lights = [];
-
-export function initSceneLights(scene) {
-  for (let i = 0; i < 16; ++i) {
-    const light = new THREE.PointLight(0xefc070,5,2,0.5);
-    light.visible = false;
-    unused_lights.push(light);
-    scene.add(light);
-  }
-}
-
 export async function loadModels() {
   const loader = new GLTFLoader();
 
@@ -67,6 +55,7 @@ export async function loadModels() {
   // Lamp
   const lamp_gltf = await loader.loadAsync("./models/sep_primLamp.glb");
   lamp = lamp_gltf.scene;
+  lamp.rotation.set(0,Math.PI,0);
 
   const transparentMaterial = new THREE.MeshPhongMaterial({
     color: 0x8F8563,
@@ -74,7 +63,7 @@ export async function loadModels() {
     transparent: true, // Enable transparency for the material
     side: THREE.DoubleSide,
     emissive: 0xefc070,
-    emissiveIntensity: 2,
+    emissiveIntensity: 1.6,
     toneMapped: false
   });
 
@@ -99,12 +88,23 @@ export function clearModels(scene) {
   cubes = [];
 }
 
+let lights = [];
+
+export function initSceneLights(scene) {
+  for (let i = 0; i < 12; ++i) {
+    const light = new THREE.PointLight(0xefc070,5,2,0.5);
+    light.visible = false;
+    lights.push(light);
+    scene.add(light);
+  }
+}
+
 const globalseed = 0.001;
 
-const light_lamp = new THREE.PointLight(0xefc070,5,2,0.5);
+// const light_lamp = new THREE.PointLight(0xefc070,5,2,0.5);
 
 export function updateCubes(scene, camera) {
-  let range = 5;
+  let range = 25;
 
   let nearest_x = Math.round(camera.position.x);
   let nearest_z = Math.round(camera.position.z);
@@ -131,23 +131,16 @@ export function updateCubes(scene, camera) {
     }
   }
 
-  // let new_used_lights = [];
-  // let cur_light = used_lights.pop();
-  // while (cur_light !== undefined) {
-  //   let x = cur_light.position.x;
-  //   let z = cur_light.position.z;
+  cubes = new_cubes;
+
+  // for (const light of lights) {
+  //   let x = light.position.x;
+  //   let z = light.position.z;
   //   if ((x < nearest_x - range) || (x > nearest_x + range) ||
   //     (z < nearest_z - range) || (z > nearest_z + range)) {
   //     light.visible = false;
-  //     unused_lights.push(cur_light);
-  //   } else {
-  //     new_used_lights.push(cur_light);
   //   }
-  //   cur_light = used_lights.pop();
   // }
-  // used_lights = new_used_lights;
-
-  cubes = new_cubes;
 
   for (let i = nearest_x - range; i <= nearest_x + range; ++i) {
     for (let j = nearest_z - range; j <= nearest_z + range; ++j) {
@@ -171,23 +164,29 @@ export function updateCubes(scene, camera) {
             new_cube.scale.set(0.5, 0.5, 0.5);
             new_cube.position.set(i, 0, j);
           }
-          else if (misc_decider < 0.4) {
-            // let possible_lamp = unused_lights.pop();
-            // if (possible_lamp === undefined) {
+          else if (misc_decider < 0.35) {
+            // let possible_lamp;
+            // for (const light of lights) {
+            //   if (!light.visible) {
+            //     possible_lamp = light;
+            //     break;
+            //   }
+            // }
+            // if (!possible_lamp) {
             //   continue;
             // }
+
             new_cube = lamp.clone();
             new_cube.scale.set(0.2, 0.2, 0.2);
-            new_cube.position.set(i, 0.1, j);
-
-            let light = light_lamp.clone();
-            light.position.set(i, 0.7, j);
-            scene.add(light);
-            cubes.push(light);
+            new_cube.position.set(i, 0.01, j);
 
             // possible_lamp.position.set(i, 0.7, j);
             // possible_lamp.visible = true;
-            // used_lights.push(possible_lamp);
+
+            // let light = light_lamp.clone();
+            // light.position.set(i, 0.7, j);
+            // scene.add(light);
+            // cubes.push(light);
           }
           else if (misc_decider < 0.7) {
             new_cube = table.clone();

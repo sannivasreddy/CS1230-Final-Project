@@ -117,23 +117,18 @@ function createPanel() {
 createPanel();
 
 // OLD LIGHTING
-// const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.2);
-// scene.add(hemiLight);
+const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 1);
+scene.add(hemiLight);
 
 // const dirLight = new THREE.DirectionalLight(0xffffff, 3);
 // dirLight.color.setHSL(0.1, 1, 0.95);
 // dirLight.position.set(0, 1, 1);
 // scene.add(dirLight);
 
-let ambientLight = new THREE.AmbientLight(0xffffff,0.3);
+let ambientLight = new THREE.AmbientLight(0xffffff,0.5);
 scene.add(ambientLight);
 
 // initSceneLights(scene);
-
-// let pointLight = new THREE.PointLight(0xefc070,10,10,2);
-// pointLight.castShadow = true;
-// pointLight.position.set(0,0.25,0);
-// scene.add(pointLight);
 
 const texture_loader = new THREE.TextureLoader();
 texture_loader.setPath('./images/worn_floor/');
@@ -144,14 +139,12 @@ const floor_color = texture_loader.load('wood_floor_worn_diff_1k.jpg');
 floor_color.wrapS = THREE.RepeatWrapping;
 floor_color.wrapT = THREE.RepeatWrapping;
 floor_color.repeat.set(32, 32);
-const floor_normal = texture_loader.load('wood_floor_worn_nor_gl_1k.exr');
 const floor_disp = texture_loader.load('worn_disp.jpg');
 const floor_bump = texture_loader.load('worn_b.jpg');
 
 const geometry = new THREE.PlaneGeometry(60, 60, 10, 10);
 const material = new THREE.MeshPhongMaterial({
   map: floor_color,
-  normalMap: floor_normal,
   displacementMap: floor_disp,
   displacementScale: 0.1,
   bumpMap: floor_bump,
@@ -191,15 +184,6 @@ const wall_b = texture_loader.load('library_two_b.png');
 const wall_dis = texture_loader.load('test.png');
 const ceiling_dis = texture_loader.load('ceiling_dis.png');
 const ceiling_texture = texture_loader.load('ceiling.png');
-
-// ceiling_texture.wrapS = THREE.RepeatWrapping;
-// ceiling_texture.wrapT = THREE.RepeatWrapping;
-
-// wall_forward_texture.wrapS = THREE.RepeatWrapping;
-// wall_forward_texture.wrapT = THREE.RepeatWrapping;
-
-
-// wall_forward_texture.repeat.set(1, 1);
 
 const wall_geometry = new THREE.PlaneGeometry(200, wall_ceiling_height, 1000, 1000);
 const ceiling_geometry = new THREE.PlaneGeometry(120, 120, 100, 100);
@@ -287,7 +271,7 @@ function animate() {
     wall_ceiling.material.map.offset.set(offsetX / 1000, -offsetZ / 1000);
   }
 
-  renderer.render(scene, camera);
+  composer.render();
 }
 
 animate();
