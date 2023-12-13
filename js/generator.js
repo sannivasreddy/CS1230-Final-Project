@@ -12,6 +12,14 @@ let old_shelf;
 let desk;
 let table;
 
+let lamp;
+let light_lamp;
+
+light_lamp = new THREE.PointLight(0xefc070,10,10,2);
+//let pointHelper = new THREE.PointLightHelper(light_lamp,0.1);
+light_lamp.castShadow = true;
+//light_lamp.add(pointHelper);
+
 function hash(key) {
   key += ~(key << 15);
   key ^= (key >>> 10);
@@ -45,7 +53,7 @@ async function loadBookshelf() {
   old_shelf = old_gltf.scene;
   old_shelf.rotation.set(0, Math.PI, 0);
 
-  
+
   const desk_gltf = await loader.loadAsync("./models/simple_desk_free.glb");
   desk = desk_gltf.scene;
   desk.rotation.set(0, 0, 0);
@@ -53,6 +61,26 @@ async function loadBookshelf() {
   const table_gltf = await loader.loadAsync("./models/round_table_and_chairs.glb");
   table = table_gltf.scene;
   table.rotation.set(0,Math.PI,0);
+
+
+
+  const lamp_gltf = await loader.loadAsync("./models/primLamp.glb");
+  lamp = lamp_gltf.scene;
+  lamp.rotation.set(0,Math.PI,0);
+
+  const transparentMaterial = new THREE.MeshBasicMaterial({
+    color: 0x8F8563,
+    opacity: 0.95, // Set the desired opacity between 0 and 1
+    transparent: true, // Enable transparency for the material
+  });
+
+  const lampMesh = lamp.children[1];
+
+  if (lampMesh.isMesh) {
+    lampMesh.material = transparentMaterial;
+  }
+
+  
 }
 
 function updateCubes(scene, camera) {
@@ -103,7 +131,7 @@ function updateCubes(scene, camera) {
         if(j%5 == 0){
           if(desk){
             let desk_decider = rnd();
-            if(desk_decider < 0.3){
+            if(desk_decider < 0.2){
               let desk_cube = desk.clone();
               desk_cube.position.set(i, 0 ,j);
               desk_cube.scale.set(0.5, 0.5, 0.5);
@@ -111,13 +139,24 @@ function updateCubes(scene, camera) {
               scene.add(desk_cube);
               cubes.push(desk_cube);
               continue;
-            } else if(desk_decider < 0.6){
+            } else if(desk_decider < 0.5){
               let table_cube = table.clone();
               table_cube.position.set(i, 0, j);
               table_cube.scale.set(0.3,0.3,0.3);
 
               scene.add(table_cube);
               cubes.push(table_cube);
+              continue;
+            } else if(desk_decider < 0.6){
+              let lamp_cube = lamp.clone();
+              lamp_cube.position.set(i, 0.1, j);
+              let pointLight = new THREE.PointLight(0xefc070,5,2,0.5);
+              pointLight.position.set(i, 1, j);
+              lamp_cube.scale.set(0.2,0.2,0.2);
+              scene.add(pointLight);
+              scene.add(lamp_cube);
+              cubes.push(pointLight);
+              cubes.push(lamp_cube);
               continue;
             }
           }  

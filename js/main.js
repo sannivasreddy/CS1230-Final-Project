@@ -130,20 +130,8 @@ loader.setPath('./images/walls/');
 // dirLight.position.set(0, 1, 1);
 // scene.add(dirLight);
 
-let ambientLight = new THREE.AmbientLight(0xffffff,0.5);
+let ambientLight = new THREE.AmbientLight(0xffffff,0.3);
 scene.add(ambientLight);
-
-let pointLight = new THREE.PointLight(0xefc070,10,10,2);
-let pointHelper = new THREE.PointLightHelper(pointLight,0.1);
-pointLight.castShadow = true;
-pointLight.shadow.mapSize.width = 512; // default
-pointLight.shadow.mapSize.height = 512; // default
-pointLight.shadow.camera.near = 0.5; // default
-pointLight.shadow.camera.far = 500; // default
-pointLight.add(pointHelper);
-pointLight.position.set(0,0.25,0);
-scene.add(pointLight);
-
 
 const texture_loader = new THREE.TextureLoader();
 texture_loader.setPath('./images/worn_floor/');
@@ -155,14 +143,14 @@ floor_color.repeat.set(16, 16);
 const floor_disp = texture_loader.load('worn_dis.jpg');
 const floor_bump = texture_loader.load('word_dis.jpg');
 
-const rug_texture = texture_loader.load('rug.png');
+const rug_texture = texture_loader.load('rug_two.png');
 const rug_dis = texture_loader.load('rug_dis.png');
 
 rug_texture.wrapS = THREE.RepeatWrapping;
 rug_texture.wrapT = THREE.RepeatWrapping;
-rug_texture.repeat.set(1,10);
-const rug_geometry = new THREE.PlaneGeometry(1.2,20, 100, 100);
-const rug_material = new THREE.MeshPhongMaterial({map: rug_texture, displacementMap: rug_dis, displacementScale: 0.03});
+rug_texture.repeat.set(1,50);
+const rug_geometry = new THREE.BoxGeometry(1.2,20, 0.01);
+const rug_material = new THREE.MeshPhongMaterial({map: rug_texture, displacementMap: rug_dis, displacementScale: 0.00});
 const rug = new THREE.Mesh(rug_geometry, rug_material);
 rug.lookAt(new THREE.Vector3(0,1,0));
 rug.position.set(0,0.08,0);
@@ -276,9 +264,13 @@ function animate() {
     wall_right.position.set(camera.position.x + 100, floor.position.y + walls_height, camera.position.z);
     wall_back.position.set(camera.position.x, floor.position.y + walls_height, camera.position.z + 100);
     wall_ceiling.position.set(camera.position.x, floor.position.y + ceiling_height, camera.position.z);
+    
 
     offsetX = camera.position.x;
     offsetZ = -camera.position.z;
+
+    rug.position.set(0, 0.08, camera.position.z);
+    rug.material.map.offset.set(0, -camera.position.z * 3);
   
     floor.material.map.offset.set( offsetX, offsetZ );
     wall_ceiling.material.map.offset.set(offsetX/1000, -offsetZ/1000);
