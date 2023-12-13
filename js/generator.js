@@ -1,9 +1,4 @@
-import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-
-const geometry = new THREE.BoxGeometry(0.25, 1, 0.25);
-// const material = new THREE.MeshLambertMaterial({ color: 0x331f0E});
-const material = new THREE.MeshBasicMaterial({color: 0x331f0E});
 
 let bookshelf;
 let old_shelf;
@@ -18,8 +13,6 @@ function hash(key) {
   return key >>> 0; // Ensure the result is an unsigned 32-bit integer
 }
 
-const globalseed = 0.001;
-
 function seedrandom(seed) {
   let state = seed;
 
@@ -29,7 +22,7 @@ function seedrandom(seed) {
   };
 }
 
-async function loadBookshelf() {
+export async function loadBookshelf() {
   const loader = new GLTFLoader();
 
   // Victorian - Opt textures use gltf-transform
@@ -43,9 +36,26 @@ async function loadBookshelf() {
   old_shelf.rotation.set(0, Math.PI, 0);
 }
 
+let i_offset = 0;
+let j_offset = 0;
+
+export function randomizeOffset() {
+  i_offset = Math.floor(Math.random() * 1000000);
+  j_offset = Math.floor(Math.random() * 1000000);
+}
+
 let cubes = [];
 
-function updateCubes(scene, camera, forceAll) {
+export function clearModels(scene) {
+  for (const cube of cubes) {
+    scene.remove(cube);
+  }
+  cubes = [];
+}
+
+const globalseed = 0.001;
+
+export function updateCubes(scene, camera) {
   let range = 25;
 
   let nearest_x = Math.round(camera.position.x);
@@ -86,7 +96,7 @@ function updateCubes(scene, camera, forceAll) {
         if(i==0){
           continue;
         }
-        const seed = 0.000000001 * hash(i^hash(j^globalseed));
+        const seed = 0.000000001 * hash((i + i_offset)^hash((j+j_offset)^globalseed));
         const rnd = seedrandom(seed);
 
         // Clamp the heights so they aren't super tall or super short (Here, I also get rid 
@@ -115,9 +125,9 @@ function updateCubes(scene, camera, forceAll) {
         } else {
           new_cube = bookshelf.clone();
           if (i % 5 == 0) {
-            new_cube.scale.set(1, height, 0.5);
+            new_cube.scale.set(1, height, 0.4);
           } else {
-            new_cube.scale.set(1, height, 0.25);
+            new_cube.scale.set(1, height, 0.2);
           }
         }
 
@@ -129,53 +139,3 @@ function updateCubes(scene, camera, forceAll) {
     }
   }
 }
-
-
-
-// function updateCubes(scene, camera) {
-//   let range = 10;
-
-//   let nearest_x = Math.round(camera.position.x);
-//   let nearest_z = Math.round(camera.position.z);
-
-//   let new_cubes = [];
-
-//   let checked_points = [];
-
-//   for (let i = 0; i <= (2 * range); ++i) {
-//     checked_points[i] = [];
-//     for (let j = 0; j <= (2 * range); ++j) {
-//       checked_points[i][j] = false;
-//     }
-//   }
-
-//   for (const cube of cubes) {
-//     let x = cube.position.x;
-//     let z = cube.position.z;
-//     if ((x < nearest_x - range) || (x > nearest_x + range) ||
-//       (z < nearest_z - range) || (z > nearest_z + range)) {
-//       scene.remove(cube);
-//     } else {
-//       checked_points[x - (nearest_x - range)][z - (nearest_z - range)] = true;
-//       new_cubes.push(cube);
-//     }
-//   }
-
-//   cubes = new_cubes;
-
-//   for (let i = nearest_x - range; i <= nearest_x + range; ++i) {
-//     for (let j = nearest_z - range; j <= nearest_z + range; ++j) {
-//       if (checked_points[i - (nearest_x - range)][j - (nearest_z - range)]) {
-//         continue;
-//       }
-
-//       const new_cube = new THREE.Mesh(geometry, material);
-//       scene.add(new_cube);
-//       new_cube.position.set(i, 0.5, j);
-
-//       cubes.push(new_cube);
-//     }
-//   }
-// }
-
-export { updateCubes, loadBookshelf }

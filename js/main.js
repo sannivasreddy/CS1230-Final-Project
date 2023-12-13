@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
-import { updateCubes, loadBookshelf } from './generator';
+import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+import { updateCubes, loadBookshelf, randomizeOffset, clearModels } from './generator';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, 
@@ -17,7 +18,7 @@ controls.pointerSpeed = 2;
 
 let locked = false;
 
-document.addEventListener('click', function () {
+renderer.domElement.addEventListener('click', function () {
   if (locked) {
     controls.unlock();
     locked = false;
@@ -92,23 +93,22 @@ function onWindowResize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-// const torchlight = new THREE.SpotLight( 0xffffff, 10, 0, Math.PI/3);
+function randomizeScene() {
+  clearModels(scene);
+  randomizeOffset();
+  updateCubes(scene, camera);
+}
 
-// camera.add(torchlight);
-// camera.add(torchlight.target);
-// torchlight.position.set(0,0,0);
-// torchlight.target.position.z = -1;
+function createPanel() {
+  const panel = new GUI({width: 300});
 
-const loader = new THREE.CubeTextureLoader();
-loader.setPath('./images/nylib/');
+  const myObject = {
+    'Randomize Scene': randomizeScene
+  }
+  panel.add(myObject, 'Randomize Scene');
+}
 
-const textureCube = loader.load([
-  'px.png', 'nx.png',
-  'py.png', 'ny.png',
-  'pz.png', 'nz.png'
-]);
-
-// scene.background = textureCube;
+createPanel();
 
 const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.7);
 scene.add(hemiLight);
@@ -137,6 +137,7 @@ const material = new THREE.MeshStandardMaterial({
   normalMap: floor_normal,
   roughnessMap: floor_rough
 });
+
 const floor = new THREE.Mesh( geometry, material );
 floor.lookAt(new THREE.Vector3(0, 1, 0));
 scene.add( floor );
@@ -150,7 +151,7 @@ const direction = new THREE.Vector3();
 
 const promise = loadBookshelf();
 promise.then(result => {
-  updateCubes(scene,camera, true);
+  updateCubes(scene,camera);
 });
 
 let offsetX, offsetZ;
@@ -168,7 +169,7 @@ function animate() {
     controls.moveForward(direction.z * 2 * time);
     controls.moveRight(direction.x * 2 * time);
 
-    updateCubes(scene, camera, false);
+    updateCubes(scene, camera);
 
     floor.position.set(camera.position.x, floor.position.y, camera.position.z);
 
