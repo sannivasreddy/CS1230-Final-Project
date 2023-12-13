@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
-import { RectAreaLightHelper }  from 'three/examples/jsm/helpers/RectAreaLightHelper.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { updateCubes, loadBookshelf } from './generator';
 
 const scene = new THREE.Scene();
@@ -13,6 +15,11 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
+
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+composer.addPass(new UnrealBloomPass(undefined, 1, 1, 1))
+
 
 const controls = new PointerLockControls(camera, renderer.domElement);
 controls.pointerSpeed = 2;
@@ -276,7 +283,7 @@ function animate() {
     wall_ceiling.material.map.offset.set(offsetX/1000, -offsetZ/1000);
   }
 
-	renderer.render( scene, camera );
+	composer.render();
 }
 
 animate();

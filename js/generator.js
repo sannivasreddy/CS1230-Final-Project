@@ -68,10 +68,14 @@ async function loadBookshelf() {
   lamp = lamp_gltf.scene;
   lamp.rotation.set(0,Math.PI,0);
 
-  const transparentMaterial = new THREE.MeshBasicMaterial({
+  const transparentMaterial = new THREE.MeshPhongMaterial({
     color: 0x8F8563,
     opacity: 0.95, // Set the desired opacity between 0 and 1
     transparent: true, // Enable transparency for the material
+    side: THREE.DoubleSide,
+    emissive: 0xefc070,
+    emissiveIntensity: 2,
+    toneMapped: false
   });
 
   const lampMesh = lamp.children[1];
