@@ -15,10 +15,8 @@ let table;
 let lamp;
 let light_lamp;
 
-light_lamp = new THREE.PointLight(0xefc070,10,10,2);
-//let pointHelper = new THREE.PointLightHelper(light_lamp,0.1);
+light_lamp = new THREE.PointLight(0xefc070,5,1,0.5);
 light_lamp.castShadow = true;
-//light_lamp.add(pointHelper);
 
 function hash(key) {
   key += ~(key << 15);
@@ -46,6 +44,12 @@ async function loadBookshelf() {
   const gltf = await loader.loadAsync("./models/victorian_bookshelf.glb");
   bookshelf = gltf.scene;
   bookshelf.rotation.set(0, -Math.PI/2, 0);
+
+  bookshelf.traverse(function (node) {
+    if (node.isMesh) {
+      node.castShadow = true;
+    }
+  })
   
  
 
@@ -53,18 +57,36 @@ async function loadBookshelf() {
   old_shelf = old_gltf.scene;
   old_shelf.rotation.set(0, Math.PI, 0);
 
+  old_shelf.traverse(function (node) {
+    if (node.isMesh) {
+      node.castShadow = true;
+    }
+  })
+
 
   const desk_gltf = await loader.loadAsync("./models/simple_desk_free.glb");
   desk = desk_gltf.scene;
   desk.rotation.set(0, 0, 0);
 
+  desk.traverse(function (node) {
+    if (node.isMesh) {
+      node.castShadow = true;
+    }
+  })
+
   const table_gltf = await loader.loadAsync("./models/round_table_and_chairs.glb");
   table = table_gltf.scene;
   table.rotation.set(0,Math.PI,0);
 
+  table.traverse(function (node) {
+    if (node.isMesh) {
+      node.castShadow = true;
+    }
+  })
 
 
-  const lamp_gltf = await loader.loadAsync("./models/primLamp.glb");
+
+  const lamp_gltf = await loader.loadAsync("./models/sep_primLamp.glb");
   lamp = lamp_gltf.scene;
   lamp.rotation.set(0,Math.PI,0);
 
@@ -78,7 +100,7 @@ async function loadBookshelf() {
     toneMapped: false
   });
 
-  const lampMesh = lamp.children[1];
+  const lampMesh = lamp.children[2];
 
   if (lampMesh.isMesh) {
     lampMesh.material = transparentMaterial;
@@ -86,6 +108,8 @@ async function loadBookshelf() {
 
   
 }
+
+let lights = [];
 
 function updateCubes(scene, camera) {
   let range = 8;
@@ -115,6 +139,22 @@ function updateCubes(scene, camera) {
       new_cubes.push(cube);
     }
   }
+
+  let new_lights = [];
+
+  for (const light of lights) {
+    let x = light.position.x;
+    let z = light.position.z;
+    if ((x < nearest_x - range) || (x > nearest_x + range) ||
+      (z < nearest_z - range) || (z > nearest_z + range)) {
+      scene.remove(light);
+      // light.dispose();
+    } else {
+      new_lights.push(light);
+    }
+  }
+
+  lights = new_lights;
 
   cubes = new_cubes;
 
@@ -154,12 +194,12 @@ function updateCubes(scene, camera) {
             } else if(desk_decider < 0.6){
               let lamp_cube = lamp.clone();
               lamp_cube.position.set(i, 0.1, j);
-              let pointLight = new THREE.PointLight(0xefc070,5,2,0.5);
+              let pointLight = light_lamp.clone();
               pointLight.position.set(i, 1, j);
               lamp_cube.scale.set(0.2,0.2,0.2);
               scene.add(pointLight);
               scene.add(lamp_cube);
-              cubes.push(pointLight);
+              lights.push(pointLight);
               cubes.push(lamp_cube);
               continue;
             }

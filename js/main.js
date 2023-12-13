@@ -12,7 +12,7 @@ const camera = new THREE.PerspectiveCamera(75,
 const renderer = new THREE.WebGLRenderer();
 renderer.setPixelRatio(devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.shadowMap.enabled = true;
+// renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
 
@@ -232,6 +232,8 @@ const material = new THREE.MeshPhongMaterial({
 });
 
 const floor = new THREE.Mesh( geometry, material );
+
+floor.receiveShadow = true;
 
 floor.lookAt(new THREE.Vector3(0, 1, 0));
 
