@@ -7,8 +7,10 @@ let desk;
 let table;
 let lamp;
 
+let flag;
+
 function modelsLoaded() {
-  return bookshelf && old_shelf && desk && table && lamp;
+  return bookshelf && old_shelf && desk && table && lamp && flag;
 }
 
 function hash(key) {
@@ -30,7 +32,7 @@ function seedrandom(seed) {
   };
 }
 
-export async function loadModels() {
+export async function loadModels(scene) {
   const loader = new GLTFLoader();
 
   // Victorian Bookshelf - Opt textures are optimised with gltf-transform
@@ -69,6 +71,14 @@ export async function loadModels() {
 
   lamp.children[2].material = transparentMaterial;
 
+  // Flag
+  const flag_gltf = await loader.loadAsync("./models/floating_pirate_flag.glb");
+
+  flag = flag_gltf.scene;
+  flag.scale.set(0.003, 0.003, 0.003);
+  flag.position.set(0, -0.2, 0);
+  flag.visible = false;
+  scene.add(flag);
 }
 
 let i_offset = 0;
@@ -97,6 +107,17 @@ export function initSceneLights(scene) {
     lights.push(light);
     scene.add(light);
   }
+}
+
+export function setFlag(camera) {
+  let look_dir = new THREE.Vector3();
+  camera.getWorldDirection(look_dir);
+  flag.position.set(camera.position.x + (0.5 * look_dir.x), flag.position.y, camera.position.z + (0.5 * look_dir.z));
+  flag.visible = true;
+}
+
+export function unsetFlag() {
+  flag.visible = false;
 }
 
 const globalseed = 0.001;

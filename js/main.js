@@ -4,7 +4,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
-import { updateCubes, loadModels, randomizeOffset, clearModels, initSceneLights } from './generator';
+import { updateCubes, loadModels, randomizeOffset, clearModels, initSceneLights, setFlag, unsetFlag } from './generator';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, 
@@ -59,6 +59,12 @@ function onKeyDown(event) {
     case 'ArrowRight':
     case 'KeyD':
       moveRight = true;
+      break;
+    case 'KeyE':
+      setFlag(camera);
+      break;
+    case 'KeyQ':
+      unsetFlag();
       break;
   }
 }
@@ -232,7 +238,7 @@ camera.position.set(0, 0.5, 0);
 const clock = new THREE.Clock();
 const direction = new THREE.Vector3();
 
-const promise = loadModels();
+const promise = loadModels(scene);
 promise.then(result => {
   updateCubes(scene, camera);
 });
