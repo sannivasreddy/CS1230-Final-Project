@@ -1,8 +1,8 @@
 # Infinite Library
 
 # How To Use
-Clone Repo
-Run command 'npx vite' 
+Clone Repo ->
+Run command 'npx vite' ->
 Open local host server on browser
 
 1. Click anywhere on screen to lock camera. Click again to unlock
