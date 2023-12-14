@@ -20,6 +20,7 @@ The aesthetic we settled on for the scene was "gothic" and "dark academia", styl
 In no particular order,
 
 Procedural Generation with Frustum Culling:
+
 Per the paper, the terrain was divided into square cells in a 2D grid. Each cell represents a proxy for content based on the calculated hash for that particular cell. This was implemented in such a way that each cell would consistently have the same hash even if the player were to step out of its range and back in. If a cell goes outside of the range of the player/camera, it gets removed from the scene but its model is recycled and used for new cells introduced into the range. This allows for a more efficient use of memory and smooth generation of terrain. 
 
 Hashing: 
