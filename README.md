@@ -1,13 +1,14 @@
 # Infinite Library
 
 # How To Use
-Clone Repo ->
+Clone Repo -> 
+Install packages using 'npm install' ->
 Run command 'npx vite' ->
 Open local host server on browser
 
-1. Click anywhere on screen to lock camera. Click again to unlock
-2. When locked, rotate camera by moving mouse
-3. Use wasd keys to move around
+1. Click anywhere on screen to lock the camera. Click again to unlock.
+2. When locked, rotate the camera by moving mouse.
+3. Use the wasd keys to move around.
    
 # Goal
 
@@ -29,7 +30,7 @@ The appearance of each object is determined by a pseudo random generator seed us
 
 God Rays:
 
-Using a combination of render targets and shaders, crepuscular rays were produced in post-processing. The scene with objects and the scene with light logic were separated.
+Using a combination of render targets and shaders, crepuscular rays were produced in post-processing. The scene with objects and the scene with light logic were separated. We did not include this in the final result, since we felt the results didn't blend with the rest of the scene well.
 
 Bloom:
 
@@ -38,7 +39,7 @@ Adding lights is computationally expensive. Using the bloom effect, another post
 
 # Bugs & Other
 
-No known bugs. Scene may stutter depending computer limitations.
+No known bugs. The scene may stutter depending on computer limitations.
 
 # Credits
 

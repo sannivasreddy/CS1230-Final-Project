@@ -233,7 +233,7 @@ scene.add(wall_ceiling);
 
 scene.add(camera);
 
-camera.position.set(0, 15, 0);
+camera.position.set(0, 0.5, 0);
 
 const clock = new THREE.Clock();
 const direction = new THREE.Vector3();
