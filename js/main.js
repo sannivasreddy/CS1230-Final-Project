@@ -233,7 +233,7 @@ scene.add(wall_ceiling);
 
 scene.add(camera);
 
-camera.position.set(0, 0.5, 0);
+camera.position.set(0, 15, 0);
 
 const clock = new THREE.Clock();
 const direction = new THREE.Vector3();
@@ -253,6 +253,10 @@ function animate() {
   direction.normalize();
 
   const time = clock.getDelta();
+
+  // if (camera.position.y < 20 &&(clock.getElapsedTime() > 5)) {
+  //   camera.position.set(0, camera.position.y + time * 0.1, 0);
+  // }
 
   if ((direction.x !== 0) || (direction.z !== 0)) {
     controls.moveForward(direction.z * 2 * time);

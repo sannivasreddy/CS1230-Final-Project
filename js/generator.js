@@ -125,7 +125,7 @@ const globalseed = 0.001;
 // const light_lamp = new THREE.PointLight(0xefc070,5,2,0.5);
 
 export function updateCubes(scene, camera) {
-  let range = 25;
+  let range = 15;
 
   let nearest_x = Math.round(camera.position.x);
   let nearest_z = Math.round(camera.position.z);
